@@ -1,0 +1,74 @@
+From: Linus Lüssing <linus.luessing@c0d3.blue>
+Date: Mon, 20 Nov 2023 13:47:30 +0100
+Subject: batman-adv: GLUON: assume absence of mcast routers on OpenWrt < 23.05
+
+In Gluon networks we currently have the issue that a lot of devices are
+still running OpenWrt < 23.05. And likely many small RAM/flash devices
+will be stuck on Gluon v2021.1.2 / OpenWrt 19.07 for a while longer.
+
+These devices would block the availability of the batman-adv multicast
+opitimizations feature for routable IPv6 multicast addresses. Therefore,
+instead of defaulting to "multicast-router-present" this changes the
+behaviour to assume "no-multicast-router-present" on this "old" devices
+/ kernels.
+
+The only downside of this is: If there were a multicast router behind
+one of these "old" devices / kernels then this would potentially lead to
+multicast packet loss to it. However, with the current
+"multicast-router-present" default we would likely get over the 16 nodes
+limit enforced in Gluon (noflood-mark) and would have such packets
+filtered anyway. Therefore there is no real downside for this change in
+Gluon.
+
+Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
+
+diff --git a/compat-include/linux/if_bridge.h b/compat-include/linux/if_bridge.h
+index dfc4a0926d1fa4f4caf94b9fc5d01a63831717e9..f0cc11f340a8bf6459dbd9dfe9b1497508db0474 100644
+--- a/compat-include/linux/if_bridge.h
++++ b/compat-include/linux/if_bridge.h
+@@ -55,43 +55,13 @@ inline void __batadv_br_ip_list_check(void)
+ 
+ #if LINUX_VERSION_IS_LESS(5, 14, 0)
+ 
+-#include <net/addrconf.h>
++#include <linux/netdevice.h>
+ 
+-#if IS_ENABLED(CONFIG_IPV6)
+ static inline bool
+ br_multicast_has_router_adjacent(struct net_device *dev, int proto)
+ {
+-	struct list_head bridge_mcast_list = LIST_HEAD_INIT(bridge_mcast_list);
+-	struct br_ip_list *br_ip_entry, *tmp;
+-	int ret;
+-
+-	if (proto != ETH_P_IPV6)
+-		return true;
+-
+-	ret = br_multicast_list_adjacent(dev, &bridge_mcast_list);
+-	if (ret < 0)
+-		return true;
+-
+-	ret = false;
+-
+-	list_for_each_entry_safe(br_ip_entry, tmp, &bridge_mcast_list, list) {
+-		if (br_ip_entry->addr.proto == htons(ETH_P_IPV6) &&
+-		    ipv6_addr_is_ll_all_routers(&br_ip_entry->addr.dst.ip6))
+-			ret = true;
+-
+-		list_del(&br_ip_entry->list);
+-		kfree(br_ip_entry);
+-	}
+-
+-	return ret;
+-}
+-#else
+-static inline bool
+-br_multicast_has_router_adjacent(struct net_device *dev, int proto)
+-{
+-	return true;
++	return false;
+ }
+-#endif
+ 
+ #endif /* LINUX_VERSION_IS_LESS(5, 14, 0) */
+ 
