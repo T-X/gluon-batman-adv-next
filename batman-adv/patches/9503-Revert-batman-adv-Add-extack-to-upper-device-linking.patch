@@ -1,0 +1,34 @@
+From: Linus Lüssing <linus.luessing@c0d3.blue>
+Date: Mon, 27 Nov 2023 08:07:01 +0100
+Subject: Revert "batman-adv: Add extack to upper device linking"
+
+The extack argument to netdev_master_upper_dev_link() was introduced in
+Linux 4.15 and initially used/introduced in batman-adv v2017.4.
+
+To be able to build batman-adv v2023.3 on OpenWrt 19.07 /
+backports-4.19.237-1 we need to partially revert the according
+commit in batman-adv, depending on the backports version used, as
+backports-4.19 does not provide this function either.
+
+This reverts commit 93418db608c2d131ef2956aa6c436c8182183184.
+
+Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
+
+diff --git a/net/batman-adv/hard-interface.c b/net/batman-adv/hard-interface.c
+index 0a2cd66ced1a865ba82f8f6b8009240497e6c322..756b3adee812f5f77ded48e18a22f86bd0c97571 100644
+--- a/net/batman-adv/hard-interface.c
++++ b/net/batman-adv/hard-interface.c
+@@ -737,8 +737,13 @@ int batadv_hardif_enable_interface(struct batadv_hard_iface *hard_iface,
+ 	hard_iface->soft_iface = soft_iface;
+ 	bat_priv = netdev_priv(hard_iface->soft_iface);
+ 
++#ifdef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
++	ret = netdev_master_upper_dev_link(hard_iface->net_dev,
++					   soft_iface, NULL, NULL);
++#else // UGLY_HACK_NEW
+ 	ret = netdev_master_upper_dev_link(hard_iface->net_dev,
+ 					   soft_iface, NULL, NULL, NULL);
++#endif // UGLY_HACK_STOP
+ 	if (ret)
+ 		goto err_dev;
+ 

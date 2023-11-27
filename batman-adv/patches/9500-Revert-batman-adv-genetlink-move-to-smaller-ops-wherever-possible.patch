@@ -1,0 +1,152 @@
+From: Sven Eckelmann <sven@narfation.org>
+Date: Sat, 24 Oct 2020 22:51:23 +0200
+Subject: Revert "batman-adv: genetlink: move to smaller ops wherever possible"
+
+The netlink genl_ops interface was splitted into two parts for Linux 5.10.
+The batman-adv code changed to the new one because it doesn't use the more
+complex policy handling of genl_ops. But the backports-5.8-1 version in
+OpenWrt doesn't yet support the new genl_small_ops.
+
+This patch must be dropped directly when OpenWrt switches to backports-5.10
+or newer - otherwise it will not work as expected.
+
+This reverts commit 725b4ef5be840cfcd0ca33b9393c14dee40c10f7.
+[linus.luessing@c0d3.blue: add checks for backports >= 5.10, to be usable
+ on such newer backports, too]
+
+diff --git a/compat-include/net/genetlink.h b/compat-include/net/genetlink.h
+index 05c57ce0caa5a9afecdf3897caf138cbc55a24e9..e8d2f54e971f03a521eeff2f1b7eb951b31e7bf2 100644
+--- a/compat-include/net/genetlink.h
++++ b/compat-include/net/genetlink.h
+@@ -30,9 +30,6 @@ void batadv_genl_dump_check_consistent(struct netlink_callback *cb,
+ 
+ #endif /* LINUX_VERSION_IS_LESS(4, 15, 0) */
+ 
+-
+-#if LINUX_VERSION_IS_LESS(5, 10, 0)
+-
+ #if LINUX_VERSION_IS_LESS(5, 2, 0)
+ enum genl_validate_flags {
+ 	GENL_DONT_VALIDATE_STRICT		= BIT(0),
+@@ -41,7 +38,14 @@ enum genl_validate_flags {
+ };
+ #endif /* LINUX_VERSION_IS_LESS(5, 2, 0) */
+ 
++#if (defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 2, 0)) || \
++    (!defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 10, 0))
++
++#if defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 2, 0)
++struct batadv_genl_ops {
++#else /* !defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 10, 0) */
+ struct batadv_genl_small_ops {
++#endif /* defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 2, 0) */
+ 	int		       (*doit)(struct sk_buff *skb,
+ 				       struct genl_info *info);
+ 	int		       (*dumpit)(struct sk_buff *skb,
+@@ -70,9 +74,17 @@ struct batadv_genl_family {
+ 			 struct genl_info *info);
+         void (*post_doit)(const struct genl_ops *ops, struct sk_buff *skb,
+ 			  struct genl_info *info);
++#if defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 2, 0)
++	const struct batadv_genl_ops *ops;
++#else /* !defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 10, 0) */
+ 	const struct batadv_genl_small_ops *small_ops;
++#endif /* defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 2, 0) */
+ 	const struct genl_multicast_group *mcgrps;
++#if defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 2, 0)
++	unsigned int n_ops;
++#else /* !defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 10, 0) */
+ 	unsigned int n_small_ops;
++#endif /* defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 2, 0) */
+ 	unsigned int n_mcgrps;
+ 	struct module *module;
+ 
+@@ -96,15 +108,32 @@ static inline int batadv_genl_register_family(struct batadv_genl_family *family)
+ 	family->family.pre_doit = family->pre_doit;
+ 	family->family.post_doit = family->post_doit;
+ 	family->family.mcgrps = family->mcgrps;
++#if defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 2, 0)
++	family->family.n_ops = family->n_ops;
++#else /* !defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 10, 0) */
+ 	family->family.n_ops = family->n_small_ops;
++#endif /* defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 2, 0) */
+ 	family->family.n_mcgrps = family->n_mcgrps;
+ 	family->family.module = family->module;
+ 
++#if defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 2, 0)
++	ops = kzalloc(sizeof(*ops) * family->n_ops, GFP_KERNEL);
++#else /* !defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 10, 0) */
+ 	ops = kzalloc(sizeof(*ops) * family->n_small_ops, GFP_KERNEL);
++#endif /* defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 2, 0) */
+ 	if (!ops)
+ 		return -ENOMEM;
+ 
+ 	for (i = 0; i < family->family.n_ops; i++) {
++#if defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 2, 0)
++		ops[i].doit = family->ops[i].doit;
++		ops[i].dumpit = family->ops[i].dumpit;
++		ops[i].done = family->ops[i].done;
++		ops[i].cmd = family->ops[i].cmd;
++		ops[i].internal_flags = family->ops[i].internal_flags;
++		ops[i].flags = family->ops[i].flags;
++		ops[i].policy = family->policy;
++#else /* !defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 10, 0) */
+ 		ops[i].doit = family->small_ops[i].doit;
+ 		ops[i].dumpit = family->small_ops[i].dumpit;
+ 		ops[i].done = family->small_ops[i].done;
+@@ -115,12 +144,14 @@ static inline int batadv_genl_register_family(struct batadv_genl_family *family)
+ 		ops[i].validate = family->small_ops[i].validate;
+ #else
+ 		ops[i].policy = family->policy;
+-#endif
++#endif /* defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 2, 0) */
+ 	}
+ 
++#if !defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 10, 0)
+ #if LINUX_VERSION_IS_GEQ(5, 2, 0)
+ 	family->family.policy = family->policy;
+ #endif
++#endif /* !defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 10, 0) */
+ 
+ 	family->family.ops = ops;
+ 	family->copy_ops = ops;
+@@ -136,7 +167,11 @@ typedef struct genl_ops batadv_genl_ops_old;
+ #define batadv_post_doit(__x, __y, __z) \
+ 	batadv_post_doit(const batadv_genl_ops_old *ops, __y, __z)
+ 
++#if defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 2, 0)
++#define genl_ops batadv_genl_ops
++#else /* !defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 10, 0) */
+ #define genl_small_ops batadv_genl_small_ops
++#endif /* defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 2, 0) */
+ #define genl_family batadv_genl_family
+ 
+ #define genl_register_family(family) \
+@@ -160,7 +195,8 @@ batadv_genl_unregister_family(struct batadv_genl_family *family)
+ 	genlmsg_multicast_netns(&(_family)->family, _net, _skb, _portid, \
+ 				_group, _flags)
+ 
+-#endif /* LINUX_VERSION_IS_LESS(5, 10, 0) */
++#endif /* (defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 2, 0)) || \
++	  (!defined(HAVE_BACKPORTS_LESS_5_10) && LINUX_VERSION_IS_LESS(5, 10, 0)) */
+ 
+ 
+ #if LINUX_VERSION_IS_LESS(6, 2, 0)
+diff --git a/net/batman-adv/netlink.c b/net/batman-adv/netlink.c
+index 2b3da616b9567f9302c9e0bb511593c53d9cc508..228ca35e8abe47ef56385bdb75f801f34f4f53ca 100644
+--- a/net/batman-adv/netlink.c
++++ b/net/batman-adv/netlink.c
+@@ -1493,8 +1493,13 @@ struct genl_family batadv_netlink_family __ro_after_init = {
+ 	.pre_doit = batadv_pre_doit,
+ 	.post_doit = batadv_post_doit,
+ 	.module = THIS_MODULE,
++#ifdef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
++	.ops = batadv_netlink_ops,
++	.n_ops = ARRAY_SIZE(batadv_netlink_ops),
++#else // UGLY_HACK_NEW
+ 	.small_ops = batadv_netlink_ops,
+ 	.n_small_ops = ARRAY_SIZE(batadv_netlink_ops),
++#endif // UGLY_HACK_STOP
+ #if LINUX_VERSION_IS_GEQ(6, 1, 0) // UGLY_HACK_NEW
+ 	.resv_start_op = BATADV_CMD_SET_VLAN + 1,
+ #endif // UGLY_HACK_STOP
