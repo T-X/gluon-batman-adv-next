@@ -1,0 +1,111 @@
+From: Linus Lüssing <linus.luessing@c0d3.blue>
+Date: Mon, 27 Nov 2023 07:27:24 +0100
+Subject: Revert "batman-adv: use rcu_replace_pointer() where appropriate"
+
+rcu_replace_pointer() was introduced in Linux 5.10 and initially
+used/introduced in batman-adv v2020.2.
+
+To be able to build batman-adv v2023.3 on OpenWrt 19.07 /
+backports-4.19.237-1 we need to partially revert the according
+commit in batman-adv, depending on the backports version used, as
+backports-4.19 does not provide this function either.
+
+This reverts commit e2f194d7f45e59c2b00dfe0da822e47ea82f0a3e.
+
+Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
+
+diff --git a/compat-include/linux/rcupdate.h b/compat-include/linux/rcupdate.h
+deleted file mode 100644
+index 29bdccd0e91e20ffe2481be910c81920e67ff725..0000000000000000000000000000000000000000
+--- a/compat-include/linux/rcupdate.h
++++ /dev/null
+@@ -1,28 +0,0 @@
+-/* SPDX-License-Identifier: GPL-2.0 */
+-/* Copyright (C) B.A.T.M.A.N. contributors:
+- *
+- * Antonio Quartulli
+- *
+- * This file contains macros for maintaining compatibility with older versions
+- * of the Linux kernel.
+- */
+-
+-#ifndef _NET_BATMAN_ADV_COMPAT_LINUX_RCUPDATE_H_
+-#define _NET_BATMAN_ADV_COMPAT_LINUX_RCUPDATE_H_
+-
+-#include <linux/version.h>
+-#include_next <linux/rcupdate.h>
+-
+-#if LINUX_VERSION_IS_LESS(5, 5, 0)
+-
+-#undef rcu_replace_pointer
+-#define rcu_replace_pointer(rcu_ptr, ptr, c)				\
+-({									\
+-	typeof(ptr) __tmp = rcu_dereference_protected((rcu_ptr), (c));	\
+-	rcu_assign_pointer((rcu_ptr), (ptr));				\
+-	__tmp;								\
+-})
+-
+-#endif /* LINUX_VERSION_IS_LESS(5, 5, 0) */
+-
+-#endif /* _NET_BATMAN_ADV_COMPAT_LINUX_RCUPDATE_H_ */
+diff --git a/net/batman-adv/gateway_client.c b/net/batman-adv/gateway_client.c
+index b7466136e29243a48951c072eda9fc6d76c71aa1..72976a01b4884a9f89ee440066354427f2a8743c 100644
+--- a/net/batman-adv/gateway_client.c
++++ b/net/batman-adv/gateway_client.c
+@@ -134,8 +134,13 @@ static void batadv_gw_select(struct batadv_priv *bat_priv,
+ 	if (new_gw_node)
+ 		kref_get(&new_gw_node->refcount);
+ 
++#ifdef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
++	curr_gw_node = rcu_dereference_protected(bat_priv->gw.curr_gw, 1);
++	rcu_assign_pointer(bat_priv->gw.curr_gw, new_gw_node);
++#else // UGLY_HACK_NEW
+ 	curr_gw_node = rcu_replace_pointer(bat_priv->gw.curr_gw, new_gw_node,
+ 					   true);
++#endif // UGLY_HACK_STOP
+ 
+ 	batadv_gw_node_put(curr_gw_node);
+ 
+diff --git a/net/batman-adv/hard-interface.c b/net/batman-adv/hard-interface.c
+index 8bec13441144d4667f2831f7ec692e1c937917cf..0a2cd66ced1a865ba82f8f6b8009240497e6c322 100644
+--- a/net/batman-adv/hard-interface.c
++++ b/net/batman-adv/hard-interface.c
+@@ -485,8 +485,13 @@ static void batadv_primary_if_select(struct batadv_priv *bat_priv,
+ 	if (new_hard_iface)
+ 		kref_get(&new_hard_iface->refcount);
+ 
++#ifdef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
++	curr_hard_iface = rcu_dereference_protected(bat_priv->primary_if, 1);
++	rcu_assign_pointer(bat_priv->primary_if, new_hard_iface);
++#else // UGLY_HACK_NEW
+ 	curr_hard_iface = rcu_replace_pointer(bat_priv->primary_if,
+ 					      new_hard_iface, 1);
++#endif // UGLY_HACK_STOP
+ 
+ 	if (!new_hard_iface)
+ 		goto out;
+diff --git a/net/batman-adv/routing.c b/net/batman-adv/routing.c
+index 163cd43c4821b6df6d65945579258655bde6a09b..ef2f370dc0be3e57efd3f6456c4318e7282bdcb6 100644
+--- a/net/batman-adv/routing.c
++++ b/net/batman-adv/routing.c
+@@ -70,13 +70,20 @@ static void _batadv_update_route(struct batadv_priv *bat_priv,
+ 	 * the code needs to ensure the curr_router variable contains a pointer
+ 	 * to the replaced best neighbor.
+ 	 */
++#ifdef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
++	curr_router = rcu_dereference_protected(orig_ifinfo->router, true);
++#endif // UGLY_HACK_STOP
+ 
+ 	/* increase refcount of new best neighbor */
+ 	if (neigh_node)
+ 		kref_get(&neigh_node->refcount);
+ 
++#ifdef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
++	rcu_assign_pointer(orig_ifinfo->router, neigh_node);
++#else // UGLY_HACK_NEW
+ 	curr_router = rcu_replace_pointer(orig_ifinfo->router, neigh_node,
+ 					  true);
++#endif // UGLY_HACK_STOP
+ 	spin_unlock_bh(&orig_node->neigh_list_lock);
+ 	batadv_orig_ifinfo_put(orig_ifinfo);
+ 

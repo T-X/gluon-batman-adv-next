@@ -1,0 +1,31 @@
+From: Linus Lüssing <linus.luessing@c0d3.blue>
+Date: Thu, 30 Nov 2023 05:28:22 +0100
+Subject: Revert "batman-adv: use eth_hw_addr_set() instead of ether_addr_copy()"
+
+Introduced in Linux v5.16 / batman-adv v2021.4.
+
+To be able to build batman-adv v2023.3 on OpenWrt 19.07 /
+backports-4.19.237-1 we need to partially revert the according
+commit in batman-adv, depending on the backports version used, as
+backports-4.19 does not provide this function either.
+
+This reverts commit a4dbfc15a07ea34d610aa391de1d847bd5b9312d.
+
+Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
+
+diff --git a/net/batman-adv/soft-interface.c b/net/batman-adv/soft-interface.c
+index 6b5903461d4f0d3201ecb97b3852c5aca3c5b8d7..f35bc3e312d66f2672c4b35da5758c608253b3b3 100644
+--- a/net/batman-adv/soft-interface.c
++++ b/net/batman-adv/soft-interface.c
+@@ -133,7 +133,11 @@ static int batadv_interface_set_mac_addr(struct net_device *dev, void *p)
+ 		return -EADDRNOTAVAIL;
+ 
+ 	ether_addr_copy(old_addr, dev->dev_addr);
++#ifdef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
++	ether_addr_copy(dev->dev_addr, addr->sa_data);
++#else // UGLY_HACK_NEW
+ 	eth_hw_addr_set(dev, addr->sa_data);
++#endif // UGLY_HACK_STOP
+ 
+ 	/* only modify transtable if it has been initialized before */
+ 	if (atomic_read(&bat_priv->mesh_state) != BATADV_MESH_ACTIVE)

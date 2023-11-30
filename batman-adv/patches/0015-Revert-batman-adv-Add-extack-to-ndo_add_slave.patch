@@ -1,0 +1,31 @@
+From: Linus Lüssing <linus.luessing@c0d3.blue>
+Date: Thu, 30 Nov 2023 06:17:37 +0100
+Subject: Revert "batman-adv: Add extack to ndo_add_slave"
+
+To be able to build batman-adv v2023.3 on OpenWrt 19.07 /
+backports-4.19.237-1 we need to partially revert the according
+commit in batman-adv, depending on the backports version used, as
+backports-4.19 does not provide this function either.
+
+This reverts commit 621c17e76450528c6803c326837917d96388d992.
+
+Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
+
+diff --git a/net/batman-adv/soft-interface.c b/net/batman-adv/soft-interface.c
+index 821851ec516d22f8aa1dd0fa4447c0553682c662..3904f544957d55cb63d34e880fedc477c4e9533e 100644
+--- a/net/batman-adv/soft-interface.c
++++ b/net/batman-adv/soft-interface.c
+@@ -847,8 +847,13 @@ static int batadv_softif_init_late(struct net_device *dev)
+  * Return: 0 if successful or error otherwise.
+  */
+ static int batadv_softif_slave_add(struct net_device *dev,
++#ifdef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
++				   struct net_device *slave_dev)
++#else // UGLY_HACK_NEW
+ 				   struct net_device *slave_dev,
+ 				   struct netlink_ext_ack *extack)
++#endif // UGLY_HACK_STOP
++
+ {
+ 	struct batadv_hard_iface *hard_iface;
+ 	int ret = -EINVAL;
