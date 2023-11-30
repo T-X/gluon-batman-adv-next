@@ -71,8 +71,15 @@ PKG_EXTRA_CFLAGS:= \
 	$(patsubst CONFIG_%, -DCONFIG_%=1, $(patsubst %=m,%,$(filter %=m,$(PKG_EXTRA_KCONFIG)))) \
 	$(patsubst CONFIG_%, -DCONFIG_%=1, $(patsubst %=y,%,$(filter %=y,$(PKG_EXTRA_KCONFIG)))) \
 
+BACKPORTS_VERSION:= \
+	$(shell cat $(STAGING_DIR)/pkginfo/kmod-mac80211.version)
+
+HAVE_BACKPORTS_LESS_5_10_FLAG:= \
+	$(shell if [ -z "$(BACKPORTS_VERSION)" ] || [ "$$(printf '%s\n' "5.10" "$(BACKPORTS_VERSION)" | sort -V | head -n1)" = "5.10" ]; then echo -n ""; else echo -n "-DHAVE_BACKPORTS_LESS_5_10"; fi)
+
 NOSTDINC_FLAGS = \
 	$(KERNEL_NOSTDINC_FLAGS) \
+	$(HAVE_BACKPORTS_LESS_5_10_FLAG) \
 	-I$(PKG_BUILD_DIR)/net/batman-adv \
 	-I$(STAGING_DIR)/usr/include/mac80211-backport \
 	-I$(STAGING_DIR)/usr/include/mac80211-backport/uapi \
