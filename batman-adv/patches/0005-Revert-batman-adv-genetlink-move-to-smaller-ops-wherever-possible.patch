@@ -1,0 +1,43 @@
+From: Sven Eckelmann <sven@narfation.org>
+Date: Sat, 24 Oct 2020 22:51:23 +0200
+Subject: Revert "batman-adv: genetlink: move to smaller ops wherever possible"
+
+To be able to build batman-adv v2023.3 on OpenWrt 19.07 /
+backports-4.19.237-1 we need to partially revert the according
+commit in batman-adv, depending on the backports version used, as
+backports-4.19 does not provide this function either.
+
+This reverts commit 725b4ef5be840cfcd0ca33b9393c14dee40c10f7.
+
+Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
+
+diff --git a/net/batman-adv/netlink.c b/net/batman-adv/netlink.c
+index 2b3da616b9567f9302c9e0bb511593c53d9cc508..c4dad91dba49becb66fe6f2e04cf172efd79c147 100644
+--- a/net/batman-adv/netlink.c
++++ b/net/batman-adv/netlink.c
+@@ -1359,7 +1359,11 @@ static void batadv_post_doit(const struct genl_split_ops *ops,
+ 	}
+ }
+ 
++#ifdef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
++static const struct genl_ops batadv_netlink_ops[] = {
++#else // UGLY_HACK_NEW
+ static const struct genl_small_ops batadv_netlink_ops[] = {
++#endif // UGLY_HACK_STOP
+ 	{
+ 		.cmd = BATADV_CMD_GET_MESH,
+ 		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
+@@ -1493,8 +1497,13 @@ struct genl_family batadv_netlink_family __ro_after_init = {
+ 	.pre_doit = batadv_pre_doit,
+ 	.post_doit = batadv_post_doit,
+ 	.module = THIS_MODULE,
++#ifdef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
++	.ops = batadv_netlink_ops,
++	.n_ops = ARRAY_SIZE(batadv_netlink_ops),
++#else // UGLY_HACK_NEW
+ 	.small_ops = batadv_netlink_ops,
+ 	.n_small_ops = ARRAY_SIZE(batadv_netlink_ops),
++#endif // UGLY_HACK_STOP
+ #if LINUX_VERSION_IS_GEQ(6, 1, 0) // UGLY_HACK_NEW
+ 	.resv_start_op = BATADV_CMD_SET_VLAN + 1,
+ #endif // UGLY_HACK_STOP
