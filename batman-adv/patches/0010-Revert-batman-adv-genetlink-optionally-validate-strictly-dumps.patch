@@ -1,0 +1,176 @@
+From: Linus Lüssing <linus.luessing@c0d3.blue>
+Date: Thu, 30 Nov 2023 04:26:56 +0100
+Subject: Revert "batman-adv: genetlink: optionally validate strictly/dumps"
+
+The .validate attribute was introduced in Linux 5.2 and initially
+used/introduced in batman-adv v2019.2.
+
+To be able to build batman-adv v2023.3 on OpenWrt 19.07 /
+backports-4.19.237-1 we need to partially revert the according
+commit in batman-adv, depending on the backports version used, as
+backports-4.19 does not provide this function either.
+
+This reverts commit 2ee47abaeb35ca62bb909830e10b0e973393b853.
+
+Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
+
+diff --git a/net/batman-adv/netlink.c b/net/batman-adv/netlink.c
+index e830c369a85765c3956dfaa51657f5a255771c42..4f97300151bbeecf23efb7b4af2d80c3762c05c8 100644
+--- a/net/batman-adv/netlink.c
++++ b/net/batman-adv/netlink.c
+@@ -1368,34 +1368,44 @@ static const struct genl_small_ops batadv_netlink_ops[] = {
+ #endif // UGLY_HACK_STOP
+ 	{
+ 		.cmd = BATADV_CMD_GET_MESH,
++#ifndef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
+ 		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
++#endif // UGLY_HACK_STOP
+ 		/* can be retrieved by unprivileged users */
+ 		.doit = batadv_netlink_get_mesh,
+ 		.internal_flags = BATADV_FLAG_NEED_MESH,
+ 	},
+ 	{
+ 		.cmd = BATADV_CMD_TP_METER,
++#ifndef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
+ 		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
++#endif // UGLY_HACK_STOP
+ 		.flags = GENL_UNS_ADMIN_PERM,
+ 		.doit = batadv_netlink_tp_meter_start,
+ 		.internal_flags = BATADV_FLAG_NEED_MESH,
+ 	},
+ 	{
+ 		.cmd = BATADV_CMD_TP_METER_CANCEL,
++#ifndef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
+ 		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
++#endif // UGLY_HACK_STOP
+ 		.flags = GENL_UNS_ADMIN_PERM,
+ 		.doit = batadv_netlink_tp_meter_cancel,
+ 		.internal_flags = BATADV_FLAG_NEED_MESH,
+ 	},
+ 	{
+ 		.cmd = BATADV_CMD_GET_ROUTING_ALGOS,
++#ifndef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
+ 		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
++#endif // UGLY_HACK_STOP
+ 		.flags = GENL_UNS_ADMIN_PERM,
+ 		.dumpit = batadv_algo_dump,
+ 	},
+ 	{
+ 		.cmd = BATADV_CMD_GET_HARDIF,
++#ifndef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
+ 		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
++#endif // UGLY_HACK_STOP
+ 		/* can be retrieved by unprivileged users */
+ 		.dumpit = batadv_netlink_dump_hardif,
+ 		.doit = batadv_netlink_get_hardif,
+@@ -1404,68 +1414,90 @@ static const struct genl_small_ops batadv_netlink_ops[] = {
+ 	},
+ 	{
+ 		.cmd = BATADV_CMD_GET_TRANSTABLE_LOCAL,
++#ifndef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
+ 		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
++#endif // UGLY_HACK_STOP
+ 		.flags = GENL_UNS_ADMIN_PERM,
+ 		.dumpit = batadv_tt_local_dump,
+ 	},
+ 	{
+ 		.cmd = BATADV_CMD_GET_TRANSTABLE_GLOBAL,
++#ifndef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
+ 		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
++#endif // UGLY_HACK_STOP
+ 		.flags = GENL_UNS_ADMIN_PERM,
+ 		.dumpit = batadv_tt_global_dump,
+ 	},
+ 	{
+ 		.cmd = BATADV_CMD_GET_ORIGINATORS,
++#ifndef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
+ 		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
++#endif // UGLY_HACK_STOP
+ 		.flags = GENL_UNS_ADMIN_PERM,
+ 		.dumpit = batadv_orig_dump,
+ 	},
+ 	{
+ 		.cmd = BATADV_CMD_GET_NEIGHBORS,
++#ifndef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
+ 		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
++#endif // UGLY_HACK_STOP
+ 		.flags = GENL_UNS_ADMIN_PERM,
+ 		.dumpit = batadv_hardif_neigh_dump,
+ 	},
+ 	{
+ 		.cmd = BATADV_CMD_GET_GATEWAYS,
++#ifndef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
+ 		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
++#endif // UGLY_HACK_STOP
+ 		.flags = GENL_UNS_ADMIN_PERM,
+ 		.dumpit = batadv_gw_dump,
+ 	},
+ 	{
+ 		.cmd = BATADV_CMD_GET_BLA_CLAIM,
++#ifndef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
+ 		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
++#endif // UGLY_HACK_STOP
+ 		.flags = GENL_UNS_ADMIN_PERM,
+ 		.dumpit = batadv_bla_claim_dump,
+ 	},
+ 	{
+ 		.cmd = BATADV_CMD_GET_BLA_BACKBONE,
++#ifndef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
+ 		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
++#endif // UGLY_HACK_STOP
+ 		.flags = GENL_UNS_ADMIN_PERM,
+ 		.dumpit = batadv_bla_backbone_dump,
+ 	},
+ 	{
+ 		.cmd = BATADV_CMD_GET_DAT_CACHE,
++#ifndef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
+ 		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
++#endif // UGLY_HACK_STOP
+ 		.flags = GENL_UNS_ADMIN_PERM,
+ 		.dumpit = batadv_dat_cache_dump,
+ 	},
+ 	{
+ 		.cmd = BATADV_CMD_GET_MCAST_FLAGS,
++#ifndef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
+ 		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
++#endif // UGLY_HACK_STOP
+ 		.flags = GENL_UNS_ADMIN_PERM,
+ 		.dumpit = batadv_mcast_flags_dump,
+ 	},
+ 	{
+ 		.cmd = BATADV_CMD_SET_MESH,
++#ifndef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
+ 		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
++#endif // UGLY_HACK_STOP
+ 		.flags = GENL_UNS_ADMIN_PERM,
+ 		.doit = batadv_netlink_set_mesh,
+ 		.internal_flags = BATADV_FLAG_NEED_MESH,
+ 	},
+ 	{
+ 		.cmd = BATADV_CMD_SET_HARDIF,
++#ifndef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
+ 		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
++#endif // UGLY_HACK_STOP
+ 		.flags = GENL_UNS_ADMIN_PERM,
+ 		.doit = batadv_netlink_set_hardif,
+ 		.internal_flags = BATADV_FLAG_NEED_MESH |
+@@ -1473,7 +1505,9 @@ static const struct genl_small_ops batadv_netlink_ops[] = {
+ 	},
+ 	{
+ 		.cmd = BATADV_CMD_GET_VLAN,
++#ifndef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
+ 		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
++#endif // UGLY_HACK_STOP
+ 		/* can be retrieved by unprivileged users */
+ 		.doit = batadv_netlink_get_vlan,
+ 		.internal_flags = BATADV_FLAG_NEED_MESH |
+@@ -1481,7 +1515,9 @@ static const struct genl_small_ops batadv_netlink_ops[] = {
+ 	},
+ 	{
+ 		.cmd = BATADV_CMD_SET_VLAN,
++#ifndef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
+ 		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
++#endif // UGLY_HACK_STOP
+ 		.flags = GENL_UNS_ADMIN_PERM,
+ 		.doit = batadv_netlink_set_vlan,
+ 		.internal_flags = BATADV_FLAG_NEED_MESH |

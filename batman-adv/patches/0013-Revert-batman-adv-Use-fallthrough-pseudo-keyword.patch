@@ -1,0 +1,55 @@
+From: Linus Lüssing <linus.luessing@c0d3.blue>
+Date: Thu, 30 Nov 2023 05:53:34 +0100
+Subject: Revert "batman-adv: Use 'fallthrough' pseudo keyword"
+
+Introduced in Linux v5.5 / batman-adv v2019.5.
+
+To be able to build batman-adv v2023.3 on OpenWrt 19.07 /
+backports-4.19.237-1 we need to partially revert the according
+commit in batman-adv, depending on the backports version used, as
+backports-4.19 does not provide this function either.
+
+This reverts commit 7bb9b06ac44dfd0189cf58d6564bfc890cc10e9c.
+
+Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
+
+diff --git a/net/batman-adv/soft-interface.c b/net/batman-adv/soft-interface.c
+index f35bc3e312d66f2672c4b35da5758c608253b3b3..2e07e09d51930a86044fe21326478dc85f704231 100644
+--- a/net/batman-adv/soft-interface.c
++++ b/net/batman-adv/soft-interface.c
+@@ -234,7 +234,11 @@ static netdev_tx_t batadv_interface_tx(struct sk_buff *skb,
+ 			break;
+ 		}
+ 
++#ifdef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
++		/* fall through */
++#else // UGLY_HACK_NEW
+ 		fallthrough;
++#endif // UGLY_HACK_STOP
+ 	case ETH_P_BATMAN:
+ 		goto dropped;
+ 	}
+@@ -314,7 +318,11 @@ static netdev_tx_t batadv_interface_tx(struct sk_buff *skb,
+ 				do_bcast = false;
+ 				break;
+ 			case BATADV_FORW_NONE:
++#ifdef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
++				/* fall through */
++#else // UGLY_HACK_NEW
+ 				fallthrough;
++#endif // UGLY_HACK_STOP
+ 			default:
+ 				goto dropped;
+ 			}
+@@ -452,7 +460,11 @@ void batadv_interface_rx(struct net_device *soft_iface,
+ 		if (vhdr->h_vlan_encapsulated_proto != htons(ETH_P_BATMAN))
+ 			break;
+ 
++#ifdef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
++		/* fall through */
++#else // UGLY_HACK_NEW
+ 		fallthrough;
++#endif // UGLY_HACK_STOP
+ 	case ETH_P_BATMAN:
+ 		goto dropped;
+ 	}

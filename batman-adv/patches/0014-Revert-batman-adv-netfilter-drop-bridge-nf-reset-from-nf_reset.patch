@@ -1,0 +1,31 @@
+From: Linus Lüssing <linus.luessing@c0d3.blue>
+Date: Thu, 30 Nov 2023 06:06:25 +0100
+Subject: Revert "batman-adv: netfilter: drop bridge nf reset from nf_reset"
+
+Introduced in Linux v5.4 / batman-adv v2019.4.
+
+To be able to build batman-adv v2023.3 on OpenWrt 19.07 /
+backports-4.19.237-1 we need to partially revert the according
+commit in batman-adv, depending on the backports version used, as
+backports-4.19 does not provide this function either.
+
+This reverts commit ab636a2bec851b103c638ec4cde059be0432528a.
+
+Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
+
+diff --git a/net/batman-adv/soft-interface.c b/net/batman-adv/soft-interface.c
+index 2e07e09d51930a86044fe21326478dc85f704231..821851ec516d22f8aa1dd0fa4447c0553682c662 100644
+--- a/net/batman-adv/soft-interface.c
++++ b/net/batman-adv/soft-interface.c
+@@ -441,7 +441,11 @@ void batadv_interface_rx(struct net_device *soft_iface,
+ 	/* clean the netfilter state now that the batman-adv header has been
+ 	 * removed
+ 	 */
++#ifdef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
++	nf_reset(skb);
++#else // UGLY_HACK_NEW
+ 	nf_reset_ct(skb);
++#endif // UGLY_HACK_STOP
+ 
+ 	if (unlikely(!pskb_may_pull(skb, ETH_HLEN)))
+ 		goto dropped;
