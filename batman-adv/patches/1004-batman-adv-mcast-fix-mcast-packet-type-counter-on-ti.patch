@@ -1,0 +1,34 @@
+From e6fbde1250b73c3c9f49fc5a22ad9a8b10f864d5 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Linus=20L=C3=BCssing?= <linus.luessing@c0d3.blue>
+Date: Tue, 9 Jan 2024 22:58:59 +0100
+Subject: [PATCH] batman-adv: mcast: fix mcast packet type counter on timeouted
+ nodes
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+When a node which does not have the new batman-adv multicast packet type
+capability vanishes then the according, global counter erroneously would
+not be reduced in response on other nodes. Which in turn leads to the mesh
+never switching back to sending with the new multicast packet type.
+
+Fix this by reducing the according counter when such a node times out.
+
+Fixes: be9b0169c840 ("batman-adv: mcast: implement multicast packet generation")
+Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
+Signed-off-by: Sven Eckelmann <sven@narfation.org>
+---
+ net/batman-adv/multicast.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+--- a/net/batman-adv/multicast.c
++++ b/net/batman-adv/multicast.c
+@@ -2213,6 +2213,8 @@ void batadv_mcast_purge_orig(struct bata
+ 				      BATADV_MCAST_WANT_NO_RTR4);
+ 	batadv_mcast_want_rtr6_update(bat_priv, orig,
+ 				      BATADV_MCAST_WANT_NO_RTR6);
++	batadv_mcast_have_mc_ptype_update(bat_priv, orig,
++					  BATADV_MCAST_HAVE_MC_PTYPE_CAPA);
+ 
+ 	spin_unlock_bh(&orig->mcast_handler_lock);
+ }

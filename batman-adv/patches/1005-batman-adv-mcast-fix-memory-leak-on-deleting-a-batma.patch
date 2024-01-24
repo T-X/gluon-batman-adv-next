@@ -1,0 +1,37 @@
+From ecdc425a87d40eba44c9c094293d50d3e9a38b45 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Linus=20L=C3=BCssing?= <linus.luessing@c0d3.blue>
+Date: Wed, 17 Jan 2024 06:22:20 +0100
+Subject: [PATCH] batman-adv: mcast: fix memory leak on deleting a batman-adv
+ interface
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The batman-adv multicast tracker TVLV handler is registered for the
+new batman-adv multicast packet type upon creating a batman-adv interface,
+but not unregistered again upon the interface's deletion, leading to a
+memory leak.
+
+Fix this memory leak by calling the according TVLV handler unregister
+routine for the multicast tracker TVLV upon batman-adv interface
+deletion.
+
+Fixes: 8ed36122d709 ("batman-adv: mcast: implement multicast packet reception and forwarding")
+Reported-by: syzbot+ebe64cc5950868e77358@syzkaller.appspotmail.com
+Closes: https://lore.kernel.org/all/000000000000beadc4060f0cbc23@google.com/
+Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
+Signed-off-by: Sven Eckelmann <sven@narfation.org>
+---
+ net/batman-adv/multicast.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+--- a/net/batman-adv/multicast.c
++++ b/net/batman-adv/multicast.c
+@@ -2190,6 +2190,7 @@ void batadv_mcast_free(struct batadv_pri
+ 	cancel_delayed_work_sync(&bat_priv->mcast.work);
+ 
+ 	batadv_tvlv_container_unregister(bat_priv, BATADV_TVLV_MCAST, 2);
++	batadv_tvlv_handler_unregister(bat_priv, BATADV_TVLV_MCAST_TRACKER, 1);
+ 	batadv_tvlv_handler_unregister(bat_priv, BATADV_TVLV_MCAST, 2);
+ 
+ 	/* safely calling outside of worker, as worker was canceled above */
