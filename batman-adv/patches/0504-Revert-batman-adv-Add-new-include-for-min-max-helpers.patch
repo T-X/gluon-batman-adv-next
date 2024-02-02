@@ -11,9 +11,6 @@ Signed-off-by: Sven Eckelmann <sven@narfation.org>
 [linus.luessing@c0d3.blue: add checks for backports >= 5.10, to be usable
  on such newer backports, too]
 
-diff --git a/compat-include/linux/minmax.h b/compat-include/linux/minmax.h
-deleted file mode 100644
-index 9b7269e8a760361c1650b947c77702f0bdcd73d9..0000000000000000000000000000000000000000
 --- a/compat-include/linux/minmax.h
 +++ /dev/null
 @@ -1,20 +0,0 @@
@@ -37,8 +34,6 @@ index 9b7269e8a760361c1650b947c77702f0bdcd73d9..00000000000000000000000000000000
 -#endif
 -
 -#endif /* _NET_BATMAN_ADV_COMPAT_LINUX_MINMAX_H_ */
-diff --git a/net/batman-adv/bat_v.c b/net/batman-adv/bat_v.c
-index ac11f1f08db0f93bdaee81a2ce8822a6eda8db04..f5780bbb1fd5980845693847b3b1dc34f13a9bbc 100644
 --- a/net/batman-adv/bat_v.c
 +++ b/net/batman-adv/bat_v.c
 @@ -16,7 +16,11 @@
@@ -53,8 +48,6 @@ index ac11f1f08db0f93bdaee81a2ce8822a6eda8db04..f5780bbb1fd5980845693847b3b1dc34
  #include <linux/netdevice.h>
  #include <linux/netlink.h>
  #include <linux/rculist.h>
-diff --git a/net/batman-adv/bat_v_elp.c b/net/batman-adv/bat_v_elp.c
-index b0495d961eea4384baddbaac39b6fe87acdbead1..c8b4f46e03e348e63cb59dda4f978953de25b5da 100644
 --- a/net/batman-adv/bat_v_elp.c
 +++ b/net/batman-adv/bat_v_elp.c
 @@ -18,7 +18,9 @@
@@ -67,8 +60,6 @@ index b0495d961eea4384baddbaac39b6fe87acdbead1..c8b4f46e03e348e63cb59dda4f978953
  #include <linux/netdevice.h>
  #include <linux/nl80211.h>
  #include <linux/random.h>
-diff --git a/net/batman-adv/bat_v_ogm.c b/net/batman-adv/bat_v_ogm.c
-index 4d8b630c55d172f421b3fc3d0b8457431895c584..9736b92be23fadd8cbfd44b61583a2b038425db4 100644
 --- a/net/batman-adv/bat_v_ogm.c
 +++ b/net/batman-adv/bat_v_ogm.c
 @@ -18,7 +18,9 @@
@@ -81,8 +72,6 @@ index 4d8b630c55d172f421b3fc3d0b8457431895c584..9736b92be23fadd8cbfd44b61583a2b0
  #include <linux/mutex.h>
  #include <linux/netdevice.h>
  #include <linux/random.h>
-diff --git a/net/batman-adv/fragmentation.c b/net/batman-adv/fragmentation.c
-index c120c7c6d25fc13fe8e2a3724ffda4539b72d5c3..a9c9030cd65662fc81f00eed8296bd9c1787470b 100644
 --- a/net/batman-adv/fragmentation.c
 +++ b/net/batman-adv/fragmentation.c
 @@ -15,7 +15,11 @@
@@ -97,8 +86,6 @@ index c120c7c6d25fc13fe8e2a3724ffda4539b72d5c3..a9c9030cd65662fc81f00eed8296bd9c
  #include <linux/netdevice.h>
  #include <linux/skbuff.h>
  #include <linux/slab.h>
-diff --git a/net/batman-adv/hard-interface.c b/net/batman-adv/hard-interface.c
-index 95d438db8cc7638c0d8935408c50ff7f4673da6f..8bec13441144d4667f2831f7ec692e1c937917cf 100644
 --- a/net/batman-adv/hard-interface.c
 +++ b/net/batman-adv/hard-interface.c
 @@ -19,7 +19,9 @@
@@ -111,8 +98,6 @@ index 95d438db8cc7638c0d8935408c50ff7f4673da6f..8bec13441144d4667f2831f7ec692e1c
  #include <linux/mutex.h>
  #include <linux/netdevice.h>
  #include <linux/printk.h>
-diff --git a/net/batman-adv/main.c b/net/batman-adv/main.c
-index 8f1b724d0412411eb97d300aa39e13779f3440f7..8a536e1d9e8547abcb4649872d4cbb78168ed12c 100644
 --- a/net/batman-adv/main.c
 +++ b/net/batman-adv/main.c
 @@ -23,7 +23,9 @@
@@ -125,8 +110,6 @@ index 8f1b724d0412411eb97d300aa39e13779f3440f7..8a536e1d9e8547abcb4649872d4cbb78
  #include <linux/module.h>
  #include <linux/netdevice.h>
  #include <linux/printk.h>
-diff --git a/net/batman-adv/netlink.c b/net/batman-adv/netlink.c
-index c4dad91dba49becb66fe6f2e04cf172efd79c147..e830c369a85765c3956dfaa51657f5a255771c42 100644
 --- a/net/batman-adv/netlink.c
 +++ b/net/batman-adv/netlink.c
 @@ -23,7 +23,9 @@
@@ -139,8 +122,6 @@ index c4dad91dba49becb66fe6f2e04cf172efd79c147..e830c369a85765c3956dfaa51657f5a2
  #include <linux/netdevice.h>
  #include <linux/netlink.h>
  #include <linux/printk.h>
-diff --git a/net/batman-adv/tp_meter.c b/net/batman-adv/tp_meter.c
-index 93730d30af544ca810a5ea212397686023cc925e..5ef31dfabea6a0e155fed6aa8daf2b902ed32f0f 100644
 --- a/net/batman-adv/tp_meter.c
 +++ b/net/batman-adv/tp_meter.c
 @@ -23,7 +23,9 @@

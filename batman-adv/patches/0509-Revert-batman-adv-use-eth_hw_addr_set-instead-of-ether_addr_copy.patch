@@ -13,11 +13,9 @@ This reverts commit a4dbfc15a07ea34d610aa391de1d847bd5b9312d.
 
 Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
 
-diff --git a/net/batman-adv/soft-interface.c b/net/batman-adv/soft-interface.c
-index 6b5903461d4f0d3201ecb97b3852c5aca3c5b8d7..f35bc3e312d66f2672c4b35da5758c608253b3b3 100644
 --- a/net/batman-adv/soft-interface.c
 +++ b/net/batman-adv/soft-interface.c
-@@ -133,7 +133,11 @@ static int batadv_interface_set_mac_addr(struct net_device *dev, void *p)
+@@ -133,7 +133,11 @@ static int batadv_interface_set_mac_addr
  		return -EADDRNOTAVAIL;
  
  	ether_addr_copy(old_addr, dev->dev_addr);

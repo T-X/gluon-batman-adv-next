@@ -6,8 +6,6 @@ This header is only available since Linux 5.15
 
 This reverts commit 36d059797a14f0e373fdc3c79df7b467435925ad.
 
-diff --git a/net/batman-adv/log.c b/net/batman-adv/log.c
-index 7a93a1e94c40eb4e26c9ed3c6c4068d97830aa05..f0e5d14296621d7d4d81b18ac7497ab85b5d73c0 100644
 --- a/net/batman-adv/log.c
 +++ b/net/batman-adv/log.c
 @@ -7,7 +7,7 @@

@@ -13,11 +13,9 @@ This reverts commit ab636a2bec851b103c638ec4cde059be0432528a.
 
 Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
 
-diff --git a/net/batman-adv/soft-interface.c b/net/batman-adv/soft-interface.c
-index 2e07e09d51930a86044fe21326478dc85f704231..821851ec516d22f8aa1dd0fa4447c0553682c662 100644
 --- a/net/batman-adv/soft-interface.c
 +++ b/net/batman-adv/soft-interface.c
-@@ -441,7 +441,11 @@ void batadv_interface_rx(struct net_device *soft_iface,
+@@ -444,7 +444,11 @@ void batadv_interface_rx(struct net_devi
  	/* clean the netfilter state now that the batman-adv header has been
  	 * removed
  	 */

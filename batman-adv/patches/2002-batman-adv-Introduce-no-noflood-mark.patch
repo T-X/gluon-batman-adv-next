@@ -12,8 +12,6 @@ therefore creating no burdon to unrelated nodes.
 
 Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
 
-diff --git a/include/uapi/linux/batman_adv.h b/include/uapi/linux/batman_adv.h
-index 11cd170036ff5c0a874022524010ded4ddb8ea16..01b9270434f0c8895f74fa7d62d1dff9cc810582 100644
 --- a/include/uapi/linux/batman_adv.h
 +++ b/include/uapi/linux/batman_adv.h
 @@ -490,6 +490,18 @@ enum batadv_nl_attrs {
@@ -35,11 +33,9 @@ index 11cd170036ff5c0a874022524010ded4ddb8ea16..01b9270434f0c8895f74fa7d62d1dff9
  	/* add attributes above here, update the policy in netlink.c */
  
  	/**
-diff --git a/net/batman-adv/netlink.c b/net/batman-adv/netlink.c
-index 3172e9ce1ea94adbac4d99c02e37b044d33a516c..b655db0cc85b26a087927d7af62bbaa24dd848df 100644
 --- a/net/batman-adv/netlink.c
 +++ b/net/batman-adv/netlink.c
-@@ -137,6 +137,8 @@ static const struct nla_policy batadv_netlink_policy[NUM_BATADV_ATTR] = {
+@@ -137,6 +137,8 @@ static const struct nla_policy batadv_ne
  	[BATADV_ATTR_AP_ISOLATION_ENABLED]	= { .type = NLA_U8 },
  	[BATADV_ATTR_ISOLATION_MARK]		= { .type = NLA_U32 },
  	[BATADV_ATTR_ISOLATION_MASK]		= { .type = NLA_U32 },
@@ -48,7 +44,7 @@ index 3172e9ce1ea94adbac4d99c02e37b044d33a516c..b655db0cc85b26a087927d7af62bbaa2
  	[BATADV_ATTR_BONDING_ENABLED]		= { .type = NLA_U8 },
  	[BATADV_ATTR_BRIDGE_LOOP_AVOIDANCE_ENABLED]	= { .type = NLA_U8 },
  	[BATADV_ATTR_DISTRIBUTED_ARP_TABLE_ENABLED]	= { .type = NLA_U8 },
-@@ -290,6 +292,14 @@ static int batadv_netlink_mesh_fill(struct sk_buff *msg,
+@@ -290,6 +292,14 @@ static int batadv_netlink_mesh_fill(stru
  			bat_priv->isolation_mark_mask))
  		goto nla_put_failure;
  
@@ -63,7 +59,7 @@ index 3172e9ce1ea94adbac4d99c02e37b044d33a516c..b655db0cc85b26a087927d7af62bbaa2
  	if (nla_put_u8(msg, BATADV_ATTR_BONDING_ENABLED,
  		       !!atomic_read(&bat_priv->bonding)))
  		goto nla_put_failure;
-@@ -472,6 +482,18 @@ static int batadv_netlink_set_mesh(struct sk_buff *skb, struct genl_info *info)
+@@ -472,6 +482,18 @@ static int batadv_netlink_set_mesh(struc
  		bat_priv->isolation_mark_mask = nla_get_u32(attr);
  	}
  
@@ -82,11 +78,9 @@ index 3172e9ce1ea94adbac4d99c02e37b044d33a516c..b655db0cc85b26a087927d7af62bbaa2
  	if (info->attrs[BATADV_ATTR_BONDING_ENABLED]) {
  		attr = info->attrs[BATADV_ATTR_BONDING_ENABLED];
  
-diff --git a/net/batman-adv/soft-interface.c b/net/batman-adv/soft-interface.c
-index a497793c93cbc8aaa36e484f1aafe7dd2320cd66..cb019e95d54fcb7ded27dbfd234b958fc9ae962a 100644
 --- a/net/batman-adv/soft-interface.c
 +++ b/net/batman-adv/soft-interface.c
-@@ -181,6 +181,23 @@ static void batadv_interface_set_rx_mode(struct net_device *dev)
+@@ -181,6 +181,23 @@ static void batadv_interface_set_rx_mode
  {
  }
  
@@ -110,7 +104,7 @@ index a497793c93cbc8aaa36e484f1aafe7dd2320cd66..cb019e95d54fcb7ded27dbfd234b958f
  static netdev_tx_t batadv_interface_tx(struct sk_buff *skb,
  				       struct net_device *soft_iface)
  {
-@@ -345,6 +362,9 @@ static netdev_tx_t batadv_interface_tx(struct sk_buff *skb,
+@@ -345,6 +362,9 @@ send:
  		if (batadv_dat_snoop_outgoing_arp_request(bat_priv, skb))
  			brd_delay = msecs_to_jiffies(ARP_REQ_DELAY);
  
@@ -120,8 +114,6 @@ index a497793c93cbc8aaa36e484f1aafe7dd2320cd66..cb019e95d54fcb7ded27dbfd234b958f
  		if (batadv_skb_head_push(skb, sizeof(*bcast_packet)) < 0)
  			goto dropped;
  
-diff --git a/net/batman-adv/types.h b/net/batman-adv/types.h
-index bf8eab36e43bfeedd2fc304d864e2df24c6e9030..f40ba4bd8634748e3de79ab06e189b844fe738f6 100644
 --- a/net/batman-adv/types.h
 +++ b/net/batman-adv/types.h
 @@ -1718,6 +1718,18 @@ struct batadv_priv {

@@ -11,11 +11,9 @@ This reverts commit 725b4ef5be840cfcd0ca33b9393c14dee40c10f7.
 
 Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
 
-diff --git a/net/batman-adv/netlink.c b/net/batman-adv/netlink.c
-index 2b3da616b9567f9302c9e0bb511593c53d9cc508..c4dad91dba49becb66fe6f2e04cf172efd79c147 100644
 --- a/net/batman-adv/netlink.c
 +++ b/net/batman-adv/netlink.c
-@@ -1359,7 +1359,11 @@ static void batadv_post_doit(const struct genl_split_ops *ops,
+@@ -1359,7 +1359,11 @@ static void batadv_post_doit(const struc
  	}
  }
  
@@ -27,7 +25,7 @@ index 2b3da616b9567f9302c9e0bb511593c53d9cc508..c4dad91dba49becb66fe6f2e04cf172e
  	{
  		.cmd = BATADV_CMD_GET_MESH,
  		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
-@@ -1493,8 +1497,13 @@ struct genl_family batadv_netlink_family __ro_after_init = {
+@@ -1493,8 +1497,13 @@ struct genl_family batadv_netlink_family
  	.pre_doit = batadv_pre_doit,
  	.post_doit = batadv_post_doit,
  	.module = THIS_MODULE,

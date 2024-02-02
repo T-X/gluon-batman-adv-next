@@ -14,11 +14,9 @@ This reverts commit 2ee47abaeb35ca62bb909830e10b0e973393b853.
 
 Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
 
-diff --git a/net/batman-adv/netlink.c b/net/batman-adv/netlink.c
-index e830c369a85765c3956dfaa51657f5a255771c42..4f97300151bbeecf23efb7b4af2d80c3762c05c8 100644
 --- a/net/batman-adv/netlink.c
 +++ b/net/batman-adv/netlink.c
-@@ -1368,34 +1368,44 @@ static const struct genl_small_ops batadv_netlink_ops[] = {
+@@ -1368,34 +1368,44 @@ static const struct genl_small_ops batad
  #endif // UGLY_HACK_STOP
  	{
  		.cmd = BATADV_CMD_GET_MESH,
@@ -63,7 +61,7 @@ index e830c369a85765c3956dfaa51657f5a255771c42..4f97300151bbeecf23efb7b4af2d80c3
  		/* can be retrieved by unprivileged users */
  		.dumpit = batadv_netlink_dump_hardif,
  		.doit = batadv_netlink_get_hardif,
-@@ -1404,68 +1414,90 @@ static const struct genl_small_ops batadv_netlink_ops[] = {
+@@ -1404,68 +1414,90 @@ static const struct genl_small_ops batad
  	},
  	{
  		.cmd = BATADV_CMD_GET_TRANSTABLE_LOCAL,
@@ -154,7 +152,7 @@ index e830c369a85765c3956dfaa51657f5a255771c42..4f97300151bbeecf23efb7b4af2d80c3
  		.flags = GENL_UNS_ADMIN_PERM,
  		.doit = batadv_netlink_set_hardif,
  		.internal_flags = BATADV_FLAG_NEED_MESH |
-@@ -1473,7 +1505,9 @@ static const struct genl_small_ops batadv_netlink_ops[] = {
+@@ -1473,7 +1505,9 @@ static const struct genl_small_ops batad
  	},
  	{
  		.cmd = BATADV_CMD_GET_VLAN,
@@ -164,7 +162,7 @@ index e830c369a85765c3956dfaa51657f5a255771c42..4f97300151bbeecf23efb7b4af2d80c3
  		/* can be retrieved by unprivileged users */
  		.doit = batadv_netlink_get_vlan,
  		.internal_flags = BATADV_FLAG_NEED_MESH |
-@@ -1481,7 +1515,9 @@ static const struct genl_small_ops batadv_netlink_ops[] = {
+@@ -1481,7 +1515,9 @@ static const struct genl_small_ops batad
  	},
  	{
  		.cmd = BATADV_CMD_SET_VLAN,

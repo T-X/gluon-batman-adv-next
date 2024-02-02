@@ -14,9 +14,6 @@ This reverts commit e2f194d7f45e59c2b00dfe0da822e47ea82f0a3e.
 
 Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
 
-diff --git a/compat-include/linux/rcupdate.h b/compat-include/linux/rcupdate.h
-deleted file mode 100644
-index 29bdccd0e91e20ffe2481be910c81920e67ff725..0000000000000000000000000000000000000000
 --- a/compat-include/linux/rcupdate.h
 +++ /dev/null
 @@ -1,28 +0,0 @@
@@ -48,11 +45,9 @@ index 29bdccd0e91e20ffe2481be910c81920e67ff725..00000000000000000000000000000000
 -#endif /* LINUX_VERSION_IS_LESS(5, 5, 0) */
 -
 -#endif /* _NET_BATMAN_ADV_COMPAT_LINUX_RCUPDATE_H_ */
-diff --git a/net/batman-adv/gateway_client.c b/net/batman-adv/gateway_client.c
-index b7466136e29243a48951c072eda9fc6d76c71aa1..72976a01b4884a9f89ee440066354427f2a8743c 100644
 --- a/net/batman-adv/gateway_client.c
 +++ b/net/batman-adv/gateway_client.c
-@@ -134,8 +134,13 @@ static void batadv_gw_select(struct batadv_priv *bat_priv,
+@@ -134,8 +134,13 @@ static void batadv_gw_select(struct bata
  	if (new_gw_node)
  		kref_get(&new_gw_node->refcount);
  
@@ -66,11 +61,9 @@ index b7466136e29243a48951c072eda9fc6d76c71aa1..72976a01b4884a9f89ee440066354427
  
  	batadv_gw_node_put(curr_gw_node);
  
-diff --git a/net/batman-adv/hard-interface.c b/net/batman-adv/hard-interface.c
-index 8bec13441144d4667f2831f7ec692e1c937917cf..0a2cd66ced1a865ba82f8f6b8009240497e6c322 100644
 --- a/net/batman-adv/hard-interface.c
 +++ b/net/batman-adv/hard-interface.c
-@@ -485,8 +485,13 @@ static void batadv_primary_if_select(struct batadv_priv *bat_priv,
+@@ -485,8 +485,13 @@ static void batadv_primary_if_select(str
  	if (new_hard_iface)
  		kref_get(&new_hard_iface->refcount);
  
@@ -84,11 +77,9 @@ index 8bec13441144d4667f2831f7ec692e1c937917cf..0a2cd66ced1a865ba82f8f6b80092404
  
  	if (!new_hard_iface)
  		goto out;
-diff --git a/net/batman-adv/routing.c b/net/batman-adv/routing.c
-index 163cd43c4821b6df6d65945579258655bde6a09b..ef2f370dc0be3e57efd3f6456c4318e7282bdcb6 100644
 --- a/net/batman-adv/routing.c
 +++ b/net/batman-adv/routing.c
-@@ -70,13 +70,20 @@ static void _batadv_update_route(struct batadv_priv *bat_priv,
+@@ -70,13 +70,20 @@ static void _batadv_update_route(struct
  	 * the code needs to ensure the curr_router variable contains a pointer
  	 * to the replaced best neighbor.
  	 */

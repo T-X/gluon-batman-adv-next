@@ -14,11 +14,9 @@ This reverts commit 93418db608c2d131ef2956aa6c436c8182183184.
 
 Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
 
-diff --git a/net/batman-adv/hard-interface.c b/net/batman-adv/hard-interface.c
-index 0a2cd66ced1a865ba82f8f6b8009240497e6c322..756b3adee812f5f77ded48e18a22f86bd0c97571 100644
 --- a/net/batman-adv/hard-interface.c
 +++ b/net/batman-adv/hard-interface.c
-@@ -737,8 +737,13 @@ int batadv_hardif_enable_interface(struct batadv_hard_iface *hard_iface,
+@@ -737,8 +737,13 @@ int batadv_hardif_enable_interface(struc
  	hard_iface->soft_iface = soft_iface;
  	bat_priv = netdev_priv(hard_iface->soft_iface);
  

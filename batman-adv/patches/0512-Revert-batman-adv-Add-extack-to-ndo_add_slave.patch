@@ -11,11 +11,9 @@ This reverts commit 621c17e76450528c6803c326837917d96388d992.
 
 Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
 
-diff --git a/net/batman-adv/soft-interface.c b/net/batman-adv/soft-interface.c
-index 821851ec516d22f8aa1dd0fa4447c0553682c662..3904f544957d55cb63d34e880fedc477c4e9533e 100644
 --- a/net/batman-adv/soft-interface.c
 +++ b/net/batman-adv/soft-interface.c
-@@ -847,8 +847,13 @@ static int batadv_softif_init_late(struct net_device *dev)
+@@ -851,8 +851,13 @@ free_bat_counters:
   * Return: 0 if successful or error otherwise.
   */
  static int batadv_softif_slave_add(struct net_device *dev,

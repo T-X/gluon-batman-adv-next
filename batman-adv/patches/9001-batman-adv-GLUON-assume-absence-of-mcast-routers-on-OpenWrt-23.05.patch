@@ -22,11 +22,9 @@ Gluon.
 
 Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
 
-diff --git a/compat-include/linux/if_bridge.h b/compat-include/linux/if_bridge.h
-index dfc4a0926d1fa4f4caf94b9fc5d01a63831717e9..f0cc11f340a8bf6459dbd9dfe9b1497508db0474 100644
 --- a/compat-include/linux/if_bridge.h
 +++ b/compat-include/linux/if_bridge.h
-@@ -55,43 +55,13 @@ inline void __batadv_br_ip_list_check(void)
+@@ -55,43 +55,13 @@ inline void __batadv_br_ip_list_check(vo
  
  #if LINUX_VERSION_IS_LESS(5, 14, 0)
  

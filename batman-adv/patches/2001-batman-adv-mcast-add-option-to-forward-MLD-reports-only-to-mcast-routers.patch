@@ -23,8 +23,6 @@ warned about.
 
 Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
 
-diff --git a/include/uapi/linux/batman_adv.h b/include/uapi/linux/batman_adv.h
-index 35dc016c9bb41b91e59ab2b698c1097e6396cbfb..11cd170036ff5c0a874022524010ded4ddb8ea16 100644
 --- a/include/uapi/linux/batman_adv.h
 +++ b/include/uapi/linux/batman_adv.h
 @@ -481,6 +481,15 @@ enum batadv_nl_attrs {
@@ -43,11 +41,9 @@ index 35dc016c9bb41b91e59ab2b698c1097e6396cbfb..11cd170036ff5c0a874022524010ded4
  	/* add attributes above here, update the policy in netlink.c */
  
  	/**
-diff --git a/net/batman-adv/multicast.c b/net/batman-adv/multicast.c
-index f30684e64ef4f28abc40342cf1bdb13be5fd27db..5664e71e76b559faad8d39f7d5f7f18ddad82c6e 100644
 --- a/net/batman-adv/multicast.c
 +++ b/net/batman-adv/multicast.c
-@@ -1015,8 +1015,14 @@ static int batadv_mcast_forw_mode_check_ipv4(struct batadv_priv *bat_priv,
+@@ -1015,8 +1015,14 @@ static int batadv_mcast_forw_mode_check_
  	if (!pskb_may_pull(skb, sizeof(struct ethhdr) + sizeof(*iphdr)))
  		return -ENOMEM;
  
@@ -63,7 +59,7 @@ index f30684e64ef4f28abc40342cf1bdb13be5fd27db..5664e71e76b559faad8d39f7d5f7f18d
  
  	iphdr = ip_hdr(skb);
  
-@@ -1079,8 +1085,14 @@ static int batadv_mcast_forw_mode_check_ipv6(struct batadv_priv *bat_priv,
+@@ -1079,8 +1085,14 @@ static int batadv_mcast_forw_mode_check_
  	if (!pskb_may_pull(skb, sizeof(struct ethhdr) + sizeof(*ip6hdr)))
  		return -ENOMEM;
  
@@ -79,7 +75,7 @@ index f30684e64ef4f28abc40342cf1bdb13be5fd27db..5664e71e76b559faad8d39f7d5f7f18d
  
  	ip6hdr = ipv6_hdr(skb);
  
-@@ -1167,17 +1179,19 @@ static int batadv_mcast_forw_want_all_ip_count(struct batadv_priv *bat_priv,
+@@ -1167,17 +1179,19 @@ static int batadv_mcast_forw_want_all_ip
   * @protocol: the ethernet protocol type to count multicast routers for
   *
   * Return: the number of nodes which want all routable IPv4 multicast traffic
@@ -116,7 +112,7 @@ index f30684e64ef4f28abc40342cf1bdb13be5fd27db..5664e71e76b559faad8d39f7d5f7f18d
  
  	ret = batadv_mcast_forw_mode_check(bat_priv, skb, &is_unsnoopable,
  					   is_routable);
-@@ -1255,11 +1270,17 @@ batadv_mcast_forw_mode(struct batadv_priv *bat_priv, struct sk_buff *skb,
+@@ -1255,11 +1270,17 @@ batadv_mcast_forw_mode(struct batadv_pri
  
  	ethhdr = eth_hdr(skb);
  
@@ -139,7 +135,7 @@ index f30684e64ef4f28abc40342cf1bdb13be5fd27db..5664e71e76b559faad8d39f7d5f7f18d
  	rtr_count = batadv_mcast_forw_rtr_count(bat_priv, *is_routable);
  
  	total_count = tt_count + ip_count + unsnoop_count + rtr_count;
-@@ -1547,8 +1568,10 @@ batadv_mcast_forw_want_rtr(struct batadv_priv *bat_priv,
+@@ -1547,8 +1568,10 @@ batadv_mcast_forw_want_rtr(struct batadv
  {
  	switch (ntohs(eth_hdr(skb)->h_proto)) {
  	case ETH_P_IP:
@@ -150,7 +146,7 @@ index f30684e64ef4f28abc40342cf1bdb13be5fd27db..5664e71e76b559faad8d39f7d5f7f18d
  		return batadv_mcast_forw_want_all_rtr6(bat_priv, skb, vid);
  	default:
  		/* we shouldn't be here... */
-@@ -1578,12 +1601,17 @@ int batadv_mcast_forw_send(struct batadv_priv *bat_priv, struct sk_buff *skb,
+@@ -1578,12 +1601,17 @@ int batadv_mcast_forw_send(struct batadv
  {
  	int ret;
  
@@ -168,8 +164,6 @@ index f30684e64ef4f28abc40342cf1bdb13be5fd27db..5664e71e76b559faad8d39f7d5f7f18d
  	ret = batadv_mcast_forw_want_all(bat_priv, skb, vid);
  	if (ret != NET_XMIT_SUCCESS) {
  		kfree_skb(skb);
-diff --git a/net/batman-adv/multicast_forw.c b/net/batman-adv/multicast_forw.c
-index e427028c50a632eb4a512e21127ec871c7b88232..0f36ddfe9dcf931f98ae11da34145098b660e034 100644
 --- a/net/batman-adv/multicast_forw.c
 +++ b/net/batman-adv/multicast_forw.c
 @@ -14,8 +14,10 @@
@@ -183,7 +177,7 @@ index e427028c50a632eb4a512e21127ec871c7b88232..0f36ddfe9dcf931f98ae11da34145098
  #include <linux/ipv6.h>
  #include <linux/limits.h>
  #include <linux/netdevice.h>
-@@ -503,7 +505,9 @@ batadv_mcast_forw_push_dests(struct batadv_priv *bat_priv, struct sk_buff *skb,
+@@ -498,7 +500,9 @@ batadv_mcast_forw_push_dests(struct bata
  	if (!batadv_mcast_forw_push_est_padding(skb, *count, tvlv_len))
  		goto err;
  
@@ -194,11 +188,9 @@ index e427028c50a632eb4a512e21127ec871c7b88232..0f36ddfe9dcf931f98ae11da34145098
  				       tvlv_len))
  		goto err;
  
-diff --git a/net/batman-adv/netlink.c b/net/batman-adv/netlink.c
-index f1fc487db59afaf2c0de490ce81b180a81cde619..3172e9ce1ea94adbac4d99c02e37b044d33a516c 100644
 --- a/net/batman-adv/netlink.c
 +++ b/net/batman-adv/netlink.c
-@@ -149,6 +149,7 @@ static const struct nla_policy batadv_netlink_policy[NUM_BATADV_ATTR] = {
+@@ -149,6 +149,7 @@ static const struct nla_policy batadv_ne
  	[BATADV_ATTR_LOG_LEVEL]			= { .type = NLA_U32 },
  	[BATADV_ATTR_MULTICAST_FORCEFLOOD_ENABLED]	= { .type = NLA_U8 },
  	[BATADV_ATTR_MULTICAST_FANOUT]		= { .type = NLA_U32 },
@@ -206,7 +198,7 @@ index f1fc487db59afaf2c0de490ce81b180a81cde619..3172e9ce1ea94adbac4d99c02e37b044
  	[BATADV_ATTR_NETWORK_CODING_ENABLED]	= { .type = NLA_U8 },
  	[BATADV_ATTR_ORIG_INTERVAL]		= { .type = NLA_U32 },
  	[BATADV_ATTR_ELP_INTERVAL]		= { .type = NLA_U32 },
-@@ -349,6 +350,10 @@ static int batadv_netlink_mesh_fill(struct sk_buff *msg,
+@@ -349,6 +350,10 @@ static int batadv_netlink_mesh_fill(stru
  	if (nla_put_u32(msg, BATADV_ATTR_MULTICAST_FANOUT,
  			atomic_read(&bat_priv->multicast_fanout)))
  		goto nla_put_failure;
@@ -217,7 +209,7 @@ index f1fc487db59afaf2c0de490ce81b180a81cde619..3172e9ce1ea94adbac4d99c02e37b044
  #endif /* CONFIG_BATMAN_ADV_MCAST */
  
  #ifdef CONFIG_BATMAN_ADV_NC
-@@ -592,6 +597,18 @@ static int batadv_netlink_set_mesh(struct sk_buff *skb, struct genl_info *info)
+@@ -592,6 +597,18 @@ static int batadv_netlink_set_mesh(struc
  
  		atomic_set(&bat_priv->multicast_fanout, nla_get_u32(attr));
  	}
@@ -236,11 +228,9 @@ index f1fc487db59afaf2c0de490ce81b180a81cde619..3172e9ce1ea94adbac4d99c02e37b044
  #endif /* CONFIG_BATMAN_ADV_MCAST */
  
  #ifdef CONFIG_BATMAN_ADV_NC
-diff --git a/net/batman-adv/soft-interface.c b/net/batman-adv/soft-interface.c
-index 6f275d1f98ff6a05ca05bb333bf7de3ddfe2195e..a497793c93cbc8aaa36e484f1aafe7dd2320cd66 100644
 --- a/net/batman-adv/soft-interface.c
 +++ b/net/batman-adv/soft-interface.c
-@@ -782,6 +782,7 @@ static int batadv_softif_init_late(struct net_device *dev)
+@@ -782,6 +782,7 @@ static int batadv_softif_init_late(struc
  #ifdef CONFIG_BATMAN_ADV_MCAST
  	atomic_set(&bat_priv->multicast_mode, 1);
  	atomic_set(&bat_priv->multicast_fanout, 16);
@@ -248,8 +238,6 @@ index 6f275d1f98ff6a05ca05bb333bf7de3ddfe2195e..a497793c93cbc8aaa36e484f1aafe7dd
  	atomic_set(&bat_priv->mcast.num_want_all_unsnoopables, 0);
  	atomic_set(&bat_priv->mcast.num_want_all_ipv4, 0);
  	atomic_set(&bat_priv->mcast.num_want_all_ipv6, 0);
-diff --git a/net/batman-adv/types.h b/net/batman-adv/types.h
-index 00840d5784fe2599c99d4d580b9cc15ac8633b66..bf8eab36e43bfeedd2fc304d864e2df24c6e9030 100644
 --- a/net/batman-adv/types.h
 +++ b/net/batman-adv/types.h
 @@ -1683,6 +1683,13 @@ struct batadv_priv {
