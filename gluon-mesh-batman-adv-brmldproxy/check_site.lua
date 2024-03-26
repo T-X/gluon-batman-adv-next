@@ -1,1 +1,1 @@
-need_value(in_site({'mesh', 'filter_membership_reports'}), true, false)
+need_boolean({'mesh', 'filter_membership_reports'}, false)

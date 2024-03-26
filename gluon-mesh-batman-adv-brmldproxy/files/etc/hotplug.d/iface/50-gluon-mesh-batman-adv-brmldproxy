@@ -2,8 +2,7 @@
 
 ([ "$INTERFACE" != "bat0" ] || [ "$ACTION" != "ifup" ]) && exit 0
 
-# TODO: should maybe be moved to
-# package/gluon-mesh-batman-adv/files/lib/netifd/proto/gluon_bat0.sh
-# instead later? Add it here for now to easily add this via site/modules.
+[ "$(gluon-show-site | jsonfilter -e "@.mesh.filter_membership_reports")" = "false" ] && exit 0
+
 [ -x /etc/init.d/brmldproxy ] && /etc/init.d/brmldproxy enabled && \     
 	batctl multicast_mld_rtr_only 1

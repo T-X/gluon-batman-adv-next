@@ -1,6 +1,24 @@
 #!/usr/bin/lua
 
+local site = require 'gluon.site'
 local uci = require('simple-uci').cursor()
+
+local excludefilters = { 'ff00::/ff0e::' }
+if site.mesh.filter_membership_reports(true) then
+	table.insert(excludefilters, 'ff02::/ff0f::')
+	table.insert(excludefilters, 'ff05::2:1001')
+end
+
+uci:delete('brmldproxy', 'client')
+uci:section('brmldproxy', 'brmldproxy', 'client', {
+	disabled = 0,
+	bridge = 'client',
+	family = 'ipv6',
+	proxiedport = { 'bat0' },
+	excludedport = { 'local-port' },
+	excludefilter = excludefilters,
+})
+uci:save('brmldproxy')
 
 -- Allow incoming MLD on brmldp0/1/... devices
 uci:section('firewall', 'rule', 'brmldproxy_mld_in', {

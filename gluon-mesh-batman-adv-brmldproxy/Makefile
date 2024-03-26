@@ -13,20 +13,20 @@ define Package/gluon-mesh-batman-adv-brmldproxy/description
 	Gluon community wifi mesh firmware framework: Configuration to
 	enable brmldproxy in Gluon with batman-adv.
 
-	The configuration is tuned in a way to enable the usage of
-	layer 3 IPv6 multicast routers for routable IPv6 multicast
-	address ranges. But with a lot smaller MLD overhead
-	compared to the filter_membership_reports=false site.conf option.
+	If filter_membership_reports is false in the site.conf
+	then no multicast listener is filtered, but the node will
+	respond on behalf of any of its local listeners, potentially
+	reducing duplicate MLD report overhead.
 
-	If a node has no multicast listener for a routable IPv6
-	multicast address then this node will emit no MLD report
-	into the mesh. Furthermore, if a node has multiple multicast
-	listening hosts for routable IPv6 multicast addresses then the
-	node will act in deputy and respond with combined, aggregated
-	MLD reports on behalf.
-
-	This package is currently incompatible with a
-	filter_membership_reports=true site.conf option.
+	If filter_membership_reports is true in the site.conf
+	or absent then brmldproxy is additionally configured to
+	only send MLD reports for routeable IPv6 multicast addresses
+	and only to detected IPv6 multicast routers. If no such
+	router is detected or no local listeners for routeable
+	IPv6 multicast addresses exists then no MLD report is send
+	into the mesh. Which greatly reduces MLD overhead while
+	still allowing the usage of layer 3 IPv6 multicast routers.
+	This is the recommended setting especially in larger meshes.
 endef
 
 define Package/gluon-mesh-batman-adv-brmldproxy/conffiles
