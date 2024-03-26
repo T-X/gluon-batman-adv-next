@@ -19,7 +19,7 @@ You can use this in the following Gluon versions:
 For these you can simply add the following to your site/modules file:
 
 ```
-GLUON_SITE_FEEDS="batman_adv_next"
+GLUON_SITE_FEEDS+=" batman_adv_next"
 PACKAGES_BATMAN_ADV_NEXT_REPO="https://github.com/T-X/gluon-batman-adv-next.git"
 PACKAGES_BATMAN_ADV_NEXT_COMMIT="<latest-commit>"
 PACKAGES_BATMAN_ADV_NEXT_BRANCH="batman-adv-next"
