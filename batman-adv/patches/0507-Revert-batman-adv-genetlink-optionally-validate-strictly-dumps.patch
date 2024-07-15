@@ -16,7 +16,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
 
 --- a/net/batman-adv/netlink.c
 +++ b/net/batman-adv/netlink.c
-@@ -1368,34 +1368,44 @@ static const struct genl_small_ops batad
+@@ -1366,34 +1366,44 @@ static const struct genl_small_ops batad
  #endif // UGLY_HACK_STOP
  	{
  		.cmd = BATADV_CMD_GET_MESH,
@@ -61,7 +61,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		/* can be retrieved by unprivileged users */
  		.dumpit = batadv_netlink_dump_hardif,
  		.doit = batadv_netlink_get_hardif,
-@@ -1404,68 +1414,90 @@ static const struct genl_small_ops batad
+@@ -1402,68 +1412,90 @@ static const struct genl_small_ops batad
  	},
  	{
  		.cmd = BATADV_CMD_GET_TRANSTABLE_LOCAL,
@@ -152,7 +152,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		.flags = GENL_UNS_ADMIN_PERM,
  		.doit = batadv_netlink_set_hardif,
  		.internal_flags = BATADV_FLAG_NEED_MESH |
-@@ -1473,7 +1505,9 @@ static const struct genl_small_ops batad
+@@ -1471,7 +1503,9 @@ static const struct genl_small_ops batad
  	},
  	{
  		.cmd = BATADV_CMD_GET_VLAN,
@@ -162,7 +162,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		/* can be retrieved by unprivileged users */
  		.doit = batadv_netlink_get_vlan,
  		.internal_flags = BATADV_FLAG_NEED_MESH |
-@@ -1481,7 +1515,9 @@ static const struct genl_small_ops batad
+@@ -1479,7 +1513,9 @@ static const struct genl_small_ops batad
  	},
  	{
  		.cmd = BATADV_CMD_SET_VLAN,

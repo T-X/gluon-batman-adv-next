@@ -190,7 +190,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  
 --- a/net/batman-adv/netlink.c
 +++ b/net/batman-adv/netlink.c
-@@ -149,6 +149,7 @@ static const struct nla_policy batadv_ne
+@@ -147,6 +147,7 @@ static const struct nla_policy batadv_ne
  	[BATADV_ATTR_LOG_LEVEL]			= { .type = NLA_U32 },
  	[BATADV_ATTR_MULTICAST_FORCEFLOOD_ENABLED]	= { .type = NLA_U8 },
  	[BATADV_ATTR_MULTICAST_FANOUT]		= { .type = NLA_U32 },
@@ -198,7 +198,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	[BATADV_ATTR_NETWORK_CODING_ENABLED]	= { .type = NLA_U8 },
  	[BATADV_ATTR_ORIG_INTERVAL]		= { .type = NLA_U32 },
  	[BATADV_ATTR_ELP_INTERVAL]		= { .type = NLA_U32 },
-@@ -349,6 +350,10 @@ static int batadv_netlink_mesh_fill(stru
+@@ -347,6 +348,10 @@ static int batadv_netlink_mesh_fill(stru
  	if (nla_put_u32(msg, BATADV_ATTR_MULTICAST_FANOUT,
  			atomic_read(&bat_priv->multicast_fanout)))
  		goto nla_put_failure;
@@ -209,7 +209,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  #endif /* CONFIG_BATMAN_ADV_MCAST */
  
  #ifdef CONFIG_BATMAN_ADV_NC
-@@ -592,6 +597,18 @@ static int batadv_netlink_set_mesh(struc
+@@ -590,6 +595,18 @@ static int batadv_netlink_set_mesh(struc
  
  		atomic_set(&bat_priv->multicast_fanout, nla_get_u32(attr));
  	}

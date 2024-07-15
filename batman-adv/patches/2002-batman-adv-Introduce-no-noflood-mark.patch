@@ -35,7 +35,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	/**
 --- a/net/batman-adv/netlink.c
 +++ b/net/batman-adv/netlink.c
-@@ -137,6 +137,8 @@ static const struct nla_policy batadv_ne
+@@ -135,6 +135,8 @@ static const struct nla_policy batadv_ne
  	[BATADV_ATTR_AP_ISOLATION_ENABLED]	= { .type = NLA_U8 },
  	[BATADV_ATTR_ISOLATION_MARK]		= { .type = NLA_U32 },
  	[BATADV_ATTR_ISOLATION_MASK]		= { .type = NLA_U32 },
@@ -44,7 +44,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	[BATADV_ATTR_BONDING_ENABLED]		= { .type = NLA_U8 },
  	[BATADV_ATTR_BRIDGE_LOOP_AVOIDANCE_ENABLED]	= { .type = NLA_U8 },
  	[BATADV_ATTR_DISTRIBUTED_ARP_TABLE_ENABLED]	= { .type = NLA_U8 },
-@@ -290,6 +292,14 @@ static int batadv_netlink_mesh_fill(stru
+@@ -288,6 +290,14 @@ static int batadv_netlink_mesh_fill(stru
  			bat_priv->isolation_mark_mask))
  		goto nla_put_failure;
  
@@ -59,7 +59,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	if (nla_put_u8(msg, BATADV_ATTR_BONDING_ENABLED,
  		       !!atomic_read(&bat_priv->bonding)))
  		goto nla_put_failure;
-@@ -472,6 +482,18 @@ static int batadv_netlink_set_mesh(struc
+@@ -470,6 +480,18 @@ static int batadv_netlink_set_mesh(struc
  		bat_priv->isolation_mark_mask = nla_get_u32(attr);
  	}
  

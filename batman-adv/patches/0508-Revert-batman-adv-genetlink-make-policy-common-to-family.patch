@@ -16,7 +16,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
 
 --- a/net/batman-adv/netlink.c
 +++ b/net/batman-adv/netlink.c
-@@ -1372,6 +1372,9 @@ static const struct genl_small_ops batad
+@@ -1370,6 +1370,9 @@ static const struct genl_small_ops batad
  		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
  #endif // UGLY_HACK_STOP
  		/* can be retrieved by unprivileged users */
@@ -26,7 +26,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		.doit = batadv_netlink_get_mesh,
  		.internal_flags = BATADV_FLAG_NEED_MESH,
  	},
-@@ -1381,6 +1384,9 @@ static const struct genl_small_ops batad
+@@ -1379,6 +1382,9 @@ static const struct genl_small_ops batad
  		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
  #endif // UGLY_HACK_STOP
  		.flags = GENL_UNS_ADMIN_PERM,
@@ -36,7 +36,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		.doit = batadv_netlink_tp_meter_start,
  		.internal_flags = BATADV_FLAG_NEED_MESH,
  	},
-@@ -1390,6 +1396,9 @@ static const struct genl_small_ops batad
+@@ -1388,6 +1394,9 @@ static const struct genl_small_ops batad
  		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
  #endif // UGLY_HACK_STOP
  		.flags = GENL_UNS_ADMIN_PERM,
@@ -46,7 +46,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		.doit = batadv_netlink_tp_meter_cancel,
  		.internal_flags = BATADV_FLAG_NEED_MESH,
  	},
-@@ -1399,6 +1408,9 @@ static const struct genl_small_ops batad
+@@ -1397,6 +1406,9 @@ static const struct genl_small_ops batad
  		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
  #endif // UGLY_HACK_STOP
  		.flags = GENL_UNS_ADMIN_PERM,
@@ -56,7 +56,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		.dumpit = batadv_algo_dump,
  	},
  	{
-@@ -1407,6 +1419,9 @@ static const struct genl_small_ops batad
+@@ -1405,6 +1417,9 @@ static const struct genl_small_ops batad
  		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
  #endif // UGLY_HACK_STOP
  		/* can be retrieved by unprivileged users */
@@ -66,7 +66,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		.dumpit = batadv_netlink_dump_hardif,
  		.doit = batadv_netlink_get_hardif,
  		.internal_flags = BATADV_FLAG_NEED_MESH |
-@@ -1418,6 +1433,9 @@ static const struct genl_small_ops batad
+@@ -1416,6 +1431,9 @@ static const struct genl_small_ops batad
  		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
  #endif // UGLY_HACK_STOP
  		.flags = GENL_UNS_ADMIN_PERM,
@@ -76,7 +76,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		.dumpit = batadv_tt_local_dump,
  	},
  	{
-@@ -1426,6 +1444,9 @@ static const struct genl_small_ops batad
+@@ -1424,6 +1442,9 @@ static const struct genl_small_ops batad
  		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
  #endif // UGLY_HACK_STOP
  		.flags = GENL_UNS_ADMIN_PERM,
@@ -86,7 +86,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		.dumpit = batadv_tt_global_dump,
  	},
  	{
-@@ -1434,6 +1455,9 @@ static const struct genl_small_ops batad
+@@ -1432,6 +1453,9 @@ static const struct genl_small_ops batad
  		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
  #endif // UGLY_HACK_STOP
  		.flags = GENL_UNS_ADMIN_PERM,
@@ -96,7 +96,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		.dumpit = batadv_orig_dump,
  	},
  	{
-@@ -1442,6 +1466,9 @@ static const struct genl_small_ops batad
+@@ -1440,6 +1464,9 @@ static const struct genl_small_ops batad
  		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
  #endif // UGLY_HACK_STOP
  		.flags = GENL_UNS_ADMIN_PERM,
@@ -106,7 +106,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		.dumpit = batadv_hardif_neigh_dump,
  	},
  	{
-@@ -1450,6 +1477,9 @@ static const struct genl_small_ops batad
+@@ -1448,6 +1475,9 @@ static const struct genl_small_ops batad
  		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
  #endif // UGLY_HACK_STOP
  		.flags = GENL_UNS_ADMIN_PERM,
@@ -116,7 +116,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		.dumpit = batadv_gw_dump,
  	},
  	{
-@@ -1458,6 +1488,9 @@ static const struct genl_small_ops batad
+@@ -1456,6 +1486,9 @@ static const struct genl_small_ops batad
  		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
  #endif // UGLY_HACK_STOP
  		.flags = GENL_UNS_ADMIN_PERM,
@@ -126,7 +126,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		.dumpit = batadv_bla_claim_dump,
  	},
  	{
-@@ -1466,6 +1499,9 @@ static const struct genl_small_ops batad
+@@ -1464,6 +1497,9 @@ static const struct genl_small_ops batad
  		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
  #endif // UGLY_HACK_STOP
  		.flags = GENL_UNS_ADMIN_PERM,
@@ -136,7 +136,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		.dumpit = batadv_bla_backbone_dump,
  	},
  	{
-@@ -1474,6 +1510,9 @@ static const struct genl_small_ops batad
+@@ -1472,6 +1508,9 @@ static const struct genl_small_ops batad
  		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
  #endif // UGLY_HACK_STOP
  		.flags = GENL_UNS_ADMIN_PERM,
@@ -146,7 +146,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		.dumpit = batadv_dat_cache_dump,
  	},
  	{
-@@ -1482,6 +1521,9 @@ static const struct genl_small_ops batad
+@@ -1480,6 +1519,9 @@ static const struct genl_small_ops batad
  		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
  #endif // UGLY_HACK_STOP
  		.flags = GENL_UNS_ADMIN_PERM,
@@ -156,7 +156,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		.dumpit = batadv_mcast_flags_dump,
  	},
  	{
-@@ -1490,6 +1532,9 @@ static const struct genl_small_ops batad
+@@ -1488,6 +1530,9 @@ static const struct genl_small_ops batad
  		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
  #endif // UGLY_HACK_STOP
  		.flags = GENL_UNS_ADMIN_PERM,
@@ -166,7 +166,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		.doit = batadv_netlink_set_mesh,
  		.internal_flags = BATADV_FLAG_NEED_MESH,
  	},
-@@ -1499,6 +1544,9 @@ static const struct genl_small_ops batad
+@@ -1497,6 +1542,9 @@ static const struct genl_small_ops batad
  		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
  #endif // UGLY_HACK_STOP
  		.flags = GENL_UNS_ADMIN_PERM,
@@ -176,7 +176,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		.doit = batadv_netlink_set_hardif,
  		.internal_flags = BATADV_FLAG_NEED_MESH |
  				  BATADV_FLAG_NEED_HARDIF,
-@@ -1510,6 +1558,9 @@ static const struct genl_small_ops batad
+@@ -1508,6 +1556,9 @@ static const struct genl_small_ops batad
  #endif // UGLY_HACK_STOP
  		/* can be retrieved by unprivileged users */
  		.doit = batadv_netlink_get_vlan,
@@ -186,7 +186,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		.internal_flags = BATADV_FLAG_NEED_MESH |
  				  BATADV_FLAG_NEED_VLAN,
  	},
-@@ -1519,6 +1570,9 @@ static const struct genl_small_ops batad
+@@ -1517,6 +1568,9 @@ static const struct genl_small_ops batad
  		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
  #endif // UGLY_HACK_STOP
  		.flags = GENL_UNS_ADMIN_PERM,
@@ -196,7 +196,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  		.doit = batadv_netlink_set_vlan,
  		.internal_flags = BATADV_FLAG_NEED_MESH |
  				  BATADV_FLAG_NEED_VLAN,
-@@ -1530,7 +1584,9 @@ struct genl_family batadv_netlink_family
+@@ -1528,7 +1582,9 @@ struct genl_family batadv_netlink_family
  	.name = BATADV_NL_NAME,
  	.version = 1,
  	.maxattr = BATADV_ATTR_MAX,

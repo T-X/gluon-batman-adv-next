@@ -100,7 +100,7 @@ Signed-off-by: Sven Eckelmann <sven@narfation.org>
  #include <linux/printk.h>
 --- a/net/batman-adv/main.c
 +++ b/net/batman-adv/main.c
-@@ -23,7 +23,9 @@
+@@ -22,7 +22,9 @@
  #include <linux/kobject.h>
  #include <linux/kref.h>
  #include <linux/list.h>
@@ -112,7 +112,7 @@ Signed-off-by: Sven Eckelmann <sven@narfation.org>
  #include <linux/printk.h>
 --- a/net/batman-adv/netlink.c
 +++ b/net/batman-adv/netlink.c
-@@ -23,7 +23,9 @@
+@@ -21,7 +21,9 @@
  #include <linux/kernel.h>
  #include <linux/limits.h>
  #include <linux/list.h>
