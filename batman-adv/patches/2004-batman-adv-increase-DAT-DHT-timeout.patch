@@ -1,0 +1,93 @@
+From a0f66c1cafdb5d994bdc0c2a093bc7ccd67d3ba1 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Linus=20L=C3=BCssing?= <linus.luessing@c0d3.blue>
+Date: Sun, 7 Apr 2019 11:31:01 +0200
+Subject: [PATCH 2/2] batman-adv: increase DAT DHT timeout
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Currently, the DHT_GET messages of the DAT will likely be left
+unanswered due to the following issues:
+
+When a node has a matching DAT Cache entry for a local ARP Request then
+this node will answer it directly with the information provided by the
+cache. This however, will likely lead to missing ARP Replies from the
+original host. Which in turn leads to the DAT DHT not being updated.
+
+Then the local DAT cache entry will time out, triggering a unicasted
+DHT_GET. However, as the 5min. timeout has passed, the DAT DHT
+candidates will likely have purged their entry, too.
+
+So basically this results in an ARP Request broadcast fallback every
+five minutes.
+
+A second issue is that it is quite common that a host which has long
+gone offline will be tried to be contacted by another one at some remote
+period larger than the current 5min. timeout. This too leads to flooded
+ARP Requests.
+
+With this patch the purge timeout for DAT DHT entries is increased to
+30min to reduce the number of DAT ARP broadcast fallbacks.
+
+Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
+---
+ net/batman-adv/distributed-arp-table.c | 22 +++++++++++++++++-----
+ net/batman-adv/main.h                  |  3 ++-
+ 2 files changed, 19 insertions(+), 6 deletions(-)
+
+--- a/net/batman-adv/distributed-arp-table.c
++++ b/net/batman-adv/distributed-arp-table.c
+@@ -133,15 +133,27 @@ static void batadv_dat_entry_put(struct
+ }
+ 
+ /**
+- * batadv_dat_to_purge() - check whether a dat_entry has to be purged or not
++ * batadv_dat_cache_to_purge() - check if a cache entry has to be purged or not
+  * @dat_entry: the entry to check
+  *
+  * Return: true if the entry has to be purged now, false otherwise.
+  */
+-static bool batadv_dat_to_purge(struct batadv_dat_entry *dat_entry)
++static bool batadv_dat_cache_to_purge(struct batadv_dat_entry *dat_entry)
+ {
+ 	return batadv_has_timed_out(dat_entry->last_update,
+-				    BATADV_DAT_ENTRY_TIMEOUT);
++				    BATADV_DAT_CACHE_ENTRY_TIMEOUT);
++}
++
++/**
++ * batadv_dat_dht_to_purge() - check if a DHT entry has to be purged or not
++ * @dat_entry: the entry to check
++ *
++ * Return: true if the entry has to be purged now, false otherwise.
++ */
++static bool batadv_dat_dht_to_purge(struct batadv_dat_entry *dat_entry)
++{
++	return batadv_has_timed_out(dat_entry->last_update,
++				    BATADV_DAT_DHT_ENTRY_TIMEOUT);
+ }
+ 
+ /**
+@@ -202,8 +214,8 @@ static void batadv_dat_purge(struct work
+ 	priv_dat = container_of(delayed_work, struct batadv_priv_dat, work);
+ 	bat_priv = container_of(priv_dat, struct batadv_priv, dat);
+ 
+-	__batadv_dat_purge(bat_priv->dat.cache_hash, batadv_dat_to_purge);
+-	__batadv_dat_purge(bat_priv->dat.dht_hash, batadv_dat_to_purge);
++	__batadv_dat_purge(bat_priv->dat.cache_hash, batadv_dat_cache_to_purge);
++	__batadv_dat_purge(bat_priv->dat.dht_hash, batadv_dat_dht_to_purge);
+ 	batadv_dat_start_timer(bat_priv);
+ }
+ 
+--- a/net/batman-adv/main.h
++++ b/net/batman-adv/main.h
+@@ -38,7 +38,8 @@
+ #define BATADV_TT_WORK_PERIOD 5000 /* 5 seconds */
+ #define BATADV_ORIG_WORK_PERIOD 1000 /* 1 second */
+ #define BATADV_MCAST_WORK_PERIOD 500 /* 0.5 seconds */
+-#define BATADV_DAT_ENTRY_TIMEOUT (5 * 60000) /* 5 mins in milliseconds */
++#define BATADV_DAT_CACHE_ENTRY_TIMEOUT (5 * 60000) /* 5 mins in milliseconds */
++#define BATADV_DAT_DHT_ENTRY_TIMEOUT (30 * 60000) /* 30 mins in milliseconds */
+ /* sliding packet range of received originator messages in sequence numbers
+  * (should be a multiple of our word size)
+  */
