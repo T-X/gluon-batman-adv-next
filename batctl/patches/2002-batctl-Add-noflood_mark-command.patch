@@ -17,11 +17,9 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  4 files changed, 168 insertions(+)
  create mode 100644 noflood_mark.c
 
-diff --git a/Makefile b/Makefile
-index 9e6f535c7816..8bb2c673be8e 100755
 --- a/Makefile
 +++ b/Makefile
-@@ -70,6 +70,7 @@ $(eval $(call add_command,multicast_mld_rtr_only,y))
+@@ -70,6 +70,7 @@ $(eval $(call add_command,multicast_mld_
  $(eval $(call add_command,neighbors,y))
  $(eval $(call add_command,neighbors_json,y))
  $(eval $(call add_command,network_coding,y))
@@ -29,8 +27,6 @@ index 9e6f535c7816..8bb2c673be8e 100755
  $(eval $(call add_command,orig_interval,y))
  $(eval $(call add_command,originators,y))
  $(eval $(call add_command,originators_json,y))
-diff --git a/README.rst b/README.rst
-index 63b16b0f66af..b86f23f89118 100644
 --- a/README.rst
 +++ b/README.rst
 @@ -430,6 +430,21 @@ Example::
@@ -55,8 +51,6 @@ index 63b16b0f66af..b86f23f89118 100644
  batctl translocal
  -----------------
  
-diff --git a/batman_adv.h b/batman_adv.h
-index 11cd170036ff..01b9270434f0 100644
 --- a/batman_adv.h
 +++ b/batman_adv.h
 @@ -490,6 +490,18 @@ enum batadv_nl_attrs {
@@ -78,9 +72,6 @@ index 11cd170036ff..01b9270434f0 100644
  	/* add attributes above here, update the policy in netlink.c */
  
  	/**
-diff --git a/noflood_mark.c b/noflood_mark.c
-new file mode 100644
-index 000000000000..c30a89143061
 --- /dev/null
 +++ b/noflood_mark.c
 @@ -0,0 +1,140 @@
@@ -224,6 +215,3 @@ index 000000000000..c30a89143061
 +	      COMMAND_FLAG_MESH_IFACE | COMMAND_FLAG_NETLINK,
 +	      &batctl_settings_noflood_mark,
 +	      "[mark]            \tdisplay or modify noflood_mark setting");
--- 
-2.42.0
-
