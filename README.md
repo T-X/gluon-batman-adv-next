@@ -12,7 +12,7 @@ and v2023.2.x.
 You can use this in the following Gluon versions:
 
 * Gluon master
-* Gluon v2023.2.1 or a later v2023.1.x
+* Gluon v2023.2.1 or a later v2023.2.x
 * Gluon v2023.1.2 or a later v2023.1.x
 * Gluon v2021.1.2 or a later v2021.1.x
 
@@ -48,7 +48,7 @@ in the meantime.)
 
 This adds the following features to Gluon:
 
-* Updates batman-adv to v2024.0
+* Updates batman-adv to v2024.2
   * This adds the new batman-adv multicast packet type:
     * https://patchwork.open-mesh.org/project/b.a.t.m.a.n./cover/20230907010910.22427-1-linus.luessing@c0d3.blue/
       * This allows to transmit multicast to more destinations
@@ -67,8 +67,12 @@ This adds the following features to Gluon:
     to IP multicast routers. Instead of flooding these
     reports (default behaviour in batman-adv, with
     these broadcasts being blocked by Gluon by default).
+* Adds "batman-adv: increase DAT DHT timeout" patches:
+  * Should reduce ARP broadcast overhead especially from gateways
+  * https://git.open-mesh.org/batman-adv.git/shortlog/refs/heads/linus/dat-timeout
+  * https://git.open-mesh.org/batctl.git/shortlog/refs/heads/linus/dat-dht
 
-**Notes:**
+**Multicast Notes:**
 
 You will need all nodes in your domain to update to
 this batman-adv version for these features to take effect.
