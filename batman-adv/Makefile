@@ -37,6 +37,7 @@ define KernelPackage/batman-adv
   URL:=https://www.open-mesh.org/
   DEPENDS:=+BATMAN_ADV_BLA:kmod-lib-crc16 +kmod-lib-crc32c +kmod-cfg80211 +batctl
   DEPENDS+=+(LINUX_5_15&&PACKAGE_gluon-mesh-batman-adv-15):gluon-mesh-batman-adv-brmldproxy
+  DEPENDS+=+(LINUX_6_6&&PACKAGE_gluon-mesh-batman-adv-15):gluon-mesh-batman-adv-brmldproxy
   FILES:=$(PKG_BUILD_DIR)/net/batman-adv/batman-adv.$(LINUX_KMOD_SUFFIX)
   AUTOLOAD:=$(call AutoProbe,batman-adv)
 endef
