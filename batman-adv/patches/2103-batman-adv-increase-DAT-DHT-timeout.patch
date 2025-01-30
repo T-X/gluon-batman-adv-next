@@ -1,7 +1,7 @@
-From a0f66c1cafdb5d994bdc0c2a093bc7ccd67d3ba1 Mon Sep 17 00:00:00 2001
+From 099877cdb48556b215156e8414a7a58892228b0e Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Linus=20L=C3=BCssing?= <linus.luessing@c0d3.blue>
 Date: Sun, 7 Apr 2019 11:31:01 +0200
-Subject: [PATCH 2/2] batman-adv: increase DAT DHT timeout
+Subject: [PATCH 3/3] batman-adv: increase DAT DHT timeout
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -35,9 +35,11 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  net/batman-adv/main.h                  |  3 ++-
  2 files changed, 19 insertions(+), 6 deletions(-)
 
+diff --git a/net/batman-adv/distributed-arp-table.c b/net/batman-adv/distributed-arp-table.c
+index 882728e047e0..0764aa11200c 100644
 --- a/net/batman-adv/distributed-arp-table.c
 +++ b/net/batman-adv/distributed-arp-table.c
-@@ -133,15 +133,27 @@ static void batadv_dat_entry_put(struct
+@@ -132,15 +132,27 @@ static void batadv_dat_entry_put(struct batadv_dat_entry *dat_entry)
  }
  
  /**
@@ -68,7 +70,7 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  }
  
  /**
-@@ -202,8 +214,8 @@ static void batadv_dat_purge(struct work
+@@ -201,8 +213,8 @@ static void batadv_dat_purge(struct work_struct *work)
  	priv_dat = container_of(delayed_work, struct batadv_priv_dat, work);
  	bat_priv = container_of(priv_dat, struct batadv_priv, dat);
  
@@ -79,6 +81,8 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  	batadv_dat_start_timer(bat_priv);
  }
  
+diff --git a/net/batman-adv/main.h b/net/batman-adv/main.h
+index 97ea71a052f8..f04bce4eaf8c 100644
 --- a/net/batman-adv/main.h
 +++ b/net/batman-adv/main.h
 @@ -38,7 +38,8 @@
@@ -91,3 +95,6 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  /* sliding packet range of received originator messages in sequence numbers
   * (should be a multiple of our word size)
   */
+-- 
+2.47.2
+
