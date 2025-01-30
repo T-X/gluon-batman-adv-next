@@ -1,0 +1,83 @@
+From 6f166f5847375d3e50f6e0b4161f890fe9ef408d Mon Sep 17 00:00:00 2001
+From: Sven Eckelmann <sven@narfation.org>
+Date: Mon, 16 Dec 2024 19:37:12 +0100
+Subject: [PATCH 1/3] batman-adv: Map VID 0 to untagged TT VLAN
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+VID 0 is not a valid VLAN according to "802.1Q-2011" "Table 9-2—Reserved
+VID values". It is only used to indicate "priority tag" frames which only
+contain priority information and no VID.
+
+The 8021q is also redirecting the priority tagged frames to the underlying
+interface since commit ad1afb003939 ("vlan_dev: VLAN 0 should be treated as
+"no vlan tag" (802.1p packet)"). But at the same time, it automatically
+adds the VID 0 to all devices to ensure that VID 0 is in the allowed list
+of the HW filter. This resulted in a VLAN 0 which was always announced in
+OGM messages.
+
+batman-adv should therefore not create a new batadv_softif_vlan for VID 0
+and handle all VID 0 related frames using the "untagged" global/local
+translation tables.
+
+Acked-by: Antonio Quartulli <antonio@mandelbit.com>
+Signed-off-by: Sven Eckelmann <sven@narfation.org>
+---
+ net/batman-adv/main.c           |  7 +++++++
+ net/batman-adv/soft-interface.c | 14 ++++++++++++++
+ 2 files changed, 21 insertions(+)
+
+diff --git a/net/batman-adv/main.c b/net/batman-adv/main.c
+index 8acbf33234b6..bbb6ed5869de 100644
+--- a/net/batman-adv/main.c
++++ b/net/batman-adv/main.c
+@@ -637,6 +637,13 @@ unsigned short batadv_get_vid(struct sk_buff *skb, size_t header_len)
+ 
+ 	vhdr = (struct vlan_ethhdr *)(skb->data + header_len);
+ 	vid = ntohs(vhdr->h_vlan_TCI) & VLAN_VID_MASK;
++
++	/* VID 0 is only used to indicate "priority tag" frames which only
++	 * contain priority information and no VID.
++	 */
++	if (vid == 0)
++		return BATADV_NO_FLAGS;
++
+ 	vid |= BATADV_VLAN_HAS_TAG;
+ 
+ 	return vid;
+diff --git a/net/batman-adv/soft-interface.c b/net/batman-adv/soft-interface.c
+index 5f4b13a593fd..bdc64be545ff 100644
+--- a/net/batman-adv/soft-interface.c
++++ b/net/batman-adv/soft-interface.c
+@@ -677,6 +677,14 @@ static int batadv_interface_add_vid(struct net_device *dev, __be16 proto,
+ 	if (proto != htons(ETH_P_8021Q))
+ 		return -EINVAL;
+ 
++	/* VID 0 is only used to indicate "priority tag" frames which only
++	 * contain priority information and no VID. No management structures
++	 * should be created for this VID and it should be handled like an
++	 * untagged frame.
++	 */
++	if (vid == 0)
++		return 0;
++
+ 	vid |= BATADV_VLAN_HAS_TAG;
+ 
+ 	/* if a new vlan is getting created and it already exists, it means that
+@@ -724,6 +732,12 @@ static int batadv_interface_kill_vid(struct net_device *dev, __be16 proto,
+ 	if (proto != htons(ETH_P_8021Q))
+ 		return -EINVAL;
+ 
++	/* "priority tag" frames are handled like "untagged" frames
++	 * and no softif_vlan needs to be destroyed
++	 */
++	if (vid == 0)
++		return 0;
++
+ 	vlan = batadv_softif_vlan_get(bat_priv, vid | BATADV_VLAN_HAS_TAG);
+ 	if (!vlan)
+ 		return -ENOENT;
+-- 
+2.47.2
+
