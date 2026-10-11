@@ -1,0 +1,68 @@
+From 4be9c14e7d046bccb19d29fbafbe45fc07db69a8 Mon Sep 17 00:00:00 2001
+From: Sven Eckelmann <sven@narfation.org>
+Date: Sat, 27 Sep 2025 20:01:29 +0200
+Subject: [PATCH 2/4] batman-adv: Release references to inactive interfaces
+
+Trying to dump the originators or the neighbors via netlink for a meshif
+with an inactive primary interface is not allowed. The dump functions were
+checking this correctly but they didn't handle non-existing primary
+interfaces and existing _inactive_ interfaces differently.
+
+(Primary) batadv_hard_ifaces hold a references to a net_device. And
+accessing them is only allowed when either being in a RCU/spinlock
+protected section or when holding a valid reference to them. The netlink
+dump functions use the latter.
+
+But because the missing specific error handling for inactive primary
+interfaces, the reference was never dropped. This reference counting error
+was only detected when the interface should have been removed from the
+system:
+
+  unregister_netdevice: waiting for batadv_slave_0 to become free. Usage count = 2
+
+Fixes: 50eddf397ac3 ("batman-adv: netlink: reduce duplicate code by returning interfaces")
+Reported-by: syzbot+881d65229ca4f9ae8c84@syzkaller.appspotmail.com
+Reported-by: Tetsuo Handa <penguin-kernel@i-love.sakura.ne.jp>
+Signed-off-by: Sven Eckelmann <sven@narfation.org>
+---
+ net/batman-adv/originator.c | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+--- a/net/batman-adv/originator.c
++++ b/net/batman-adv/originator.c
+@@ -765,11 +765,16 @@ int batadv_hardif_neigh_dump(struct sk_b
+ 	bat_priv = netdev_priv(soft_iface);
+ 
+ 	primary_if = batadv_primary_if_get_selected(bat_priv);
+-	if (!primary_if || primary_if->if_status != BATADV_IF_ACTIVE) {
++	if (!primary_if) {
+ 		ret = -ENOENT;
+ 		goto out_put_soft_iface;
+ 	}
+ 
++	if (primary_if->if_status != BATADV_IF_ACTIVE) {
++		ret = -ENOENT;
++		goto out_put_primary_if;
++	}
++
+ 	hard_iface = batadv_netlink_get_hardif(bat_priv, cb);
+ 	if (IS_ERR(hard_iface) && PTR_ERR(hard_iface) != -ENONET) {
+ 		ret = PTR_ERR(hard_iface);
+@@ -1336,11 +1341,16 @@ int batadv_orig_dump(struct sk_buff *msg
+ 	bat_priv = netdev_priv(soft_iface);
+ 
+ 	primary_if = batadv_primary_if_get_selected(bat_priv);
+-	if (!primary_if || primary_if->if_status != BATADV_IF_ACTIVE) {
++	if (!primary_if) {
+ 		ret = -ENOENT;
+ 		goto out_put_soft_iface;
+ 	}
+ 
++	if (primary_if->if_status != BATADV_IF_ACTIVE) {
++		ret = -ENOENT;
++		goto out_put_primary_if;
++	}
++
+ 	hard_iface = batadv_netlink_get_hardif(bat_priv, cb);
+ 	if (IS_ERR(hard_iface) && PTR_ERR(hard_iface) != -ENONET) {
+ 		ret = PTR_ERR(hard_iface);

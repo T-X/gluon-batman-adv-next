@@ -1,7 +1,7 @@
 From 75d6c84c67ad6b788b589fe1bbd6d418939be17f Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Linus=20L=C3=BCssing?= <linus.luessing@c0d3.blue>
 Date: Tue, 2 Apr 2019 16:06:44 +0200
-Subject: [PATCH 2/3] batman-adv: split DAT cache into DAT cache and DAT DHT
+Subject: [PATCH 3/4] batman-adv: split DAT cache into DAT cache and DAT DHT
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -23,11 +23,9 @@ Signed-off-by: Linus Lüssing <linus.luessing@c0d3.blue>
  net/batman-adv/types.h                 |   7 +-
  6 files changed, 269 insertions(+), 85 deletions(-)
 
-diff --git a/include/uapi/linux/batman_adv.h b/include/uapi/linux/batman_adv.h
-index ea82bd50c2b2..4d0dadbce2d2 100644
 --- a/include/uapi/linux/batman_adv.h
 +++ b/include/uapi/linux/batman_adv.h
-@@ -619,6 +619,11 @@ enum batadv_nl_commands {
+@@ -625,6 +625,11 @@ enum batadv_nl_commands {
  	 */
  	BATADV_CMD_SET_VLAN,
  
@@ -39,11 +37,9 @@ index ea82bd50c2b2..4d0dadbce2d2 100644
  	/* add new commands above here */
  
  	/**
-diff --git a/net/batman-adv/distributed-arp-table.c b/net/batman-adv/distributed-arp-table.c
-index feff15817609..882728e047e0 100644
 --- a/net/batman-adv/distributed-arp-table.c
 +++ b/net/batman-adv/distributed-arp-table.c
-@@ -144,17 +144,17 @@ static bool batadv_dat_to_purge(struct batadv_dat_entry *dat_entry)
+@@ -144,17 +144,17 @@ static bool batadv_dat_to_purge(struct b
  }
  
  /**
@@ -65,7 +61,7 @@ index feff15817609..882728e047e0 100644
  			       bool (*to_purge)(struct batadv_dat_entry *))
  {
  	spinlock_t *list_lock; /* protects write access to the hash lists */
-@@ -163,12 +163,12 @@ static void __batadv_dat_purge(struct batadv_priv *bat_priv,
+@@ -163,12 +163,12 @@ static void __batadv_dat_purge(struct ba
  	struct hlist_head *head;
  	u32 i;
  
@@ -82,7 +78,7 @@ index feff15817609..882728e047e0 100644
  
  		spin_lock_bh(list_lock);
  		hlist_for_each_entry_safe(dat_entry, node_tmp, head,
-@@ -201,7 +201,8 @@ static void batadv_dat_purge(struct work_struct *work)
+@@ -201,7 +201,8 @@ static void batadv_dat_purge(struct work
  	priv_dat = container_of(delayed_work, struct batadv_priv_dat, work);
  	bat_priv = container_of(priv_dat, struct batadv_priv, dat);
  
@@ -92,7 +88,7 @@ index feff15817609..882728e047e0 100644
  	batadv_dat_start_timer(bat_priv);
  }
  
-@@ -313,21 +314,19 @@ static u32 batadv_hash_dat(const void *data, u32 size)
+@@ -313,21 +314,19 @@ static u32 batadv_hash_dat(const void *d
  }
  
  /**
@@ -117,11 +113,10 @@ index feff15817609..882728e047e0 100644
  	u32 index;
  
  	if (!hash)
-@@ -355,28 +354,63 @@ batadv_dat_entry_hash_find(struct batadv_priv *bat_priv, __be32 ip,
- 	return dat_entry_tmp;
+@@ -356,27 +355,62 @@ batadv_dat_entry_hash_find(struct batadv
  }
  
-+/**
+ /**
 + * batadv_dat_cache_entry_find() - look for a given dat_entry in the DAT cache
 + * @bat_priv: the bat priv with all the soft interface information
 + * @ip: search key
@@ -151,7 +146,7 @@ index feff15817609..882728e047e0 100644
 +	return batadv_dat_entry_hash_find(bat_priv->dat.dht_hash, ip, vid);
 +}
 +
- /**
++/**
   * batadv_dat_entry_add() - add a new dat entry or update it if already exists
   * @bat_priv: the bat priv with all the soft interface information
 + * @hash: the hash table to add to
@@ -186,7 +181,7 @@ index feff15817609..882728e047e0 100644
  			   batadv_print_vid(vid));
  		goto out;
  	}
-@@ -392,7 +426,7 @@ static void batadv_dat_entry_add(struct batadv_priv *bat_priv, __be32 ip,
+@@ -392,7 +426,7 @@ static void batadv_dat_entry_add(struct
  	kref_init(&dat_entry->refcount);
  
  	kref_get(&dat_entry->refcount);
@@ -195,7 +190,7 @@ index feff15817609..882728e047e0 100644
  				     batadv_hash_dat, dat_entry,
  				     &dat_entry->hash_entry);
  
-@@ -402,13 +436,45 @@ static void batadv_dat_entry_add(struct batadv_priv *bat_priv, __be32 ip,
+@@ -402,13 +436,45 @@ static void batadv_dat_entry_add(struct
  		goto out;
  	}
  
@@ -243,7 +238,7 @@ index feff15817609..882728e047e0 100644
  #ifdef CONFIG_BATMAN_ADV_DEBUG
  
  /**
-@@ -785,19 +851,57 @@ static void batadv_dat_tvlv_ogm_handler_v1(struct batadv_priv *bat_priv,
+@@ -785,37 +851,77 @@ static void batadv_dat_tvlv_ogm_handler_
  }
  
  /**
@@ -266,14 +261,16 @@ index feff15817609..882728e047e0 100644
  
 -	bat_priv->dat.hash = NULL;
 +	*hash = NULL;
-+}
-+
-+/**
+ }
+ 
+ /**
+- * batadv_dat_init() - initialise the DAT internals
 + * batadv_dat_cache_hash_init() - initialise the DAT cache hash table
-+ * @bat_priv: the bat priv with all the soft interface information
-+ *
-+ * Return: 0 in case of success, a negative error code otherwise
-+ */
+  * @bat_priv: the bat priv with all the soft interface information
+  *
+  * Return: 0 in case of success, a negative error code otherwise
+  */
+-int batadv_dat_init(struct batadv_priv *bat_priv)
 +static int batadv_dat_cache_hash_init(struct batadv_priv *bat_priv)
 +{
 +	if (bat_priv->dat.cache_hash)
@@ -294,41 +291,43 @@ index feff15817609..882728e047e0 100644
 + * Return: 0 in case of success, a negative error code otherwise
 + */
 +static int batadv_dat_dht_hash_init(struct batadv_priv *bat_priv)
-+{
-+	if (bat_priv->dat.dht_hash)
-+		return 0;
-+
-+	bat_priv->dat.dht_hash = batadv_hash_new(1024);
-+
-+	if (!bat_priv->dat.dht_hash)
-+		return -ENOMEM;
-+
-+	return 0;
- }
- 
- /**
-@@ -808,13 +912,15 @@ static void batadv_dat_hash_free(struct batadv_priv *bat_priv)
-  */
- int batadv_dat_init(struct batadv_priv *bat_priv)
  {
 -	if (bat_priv->dat.hash)
--		return 0;
-+	int ret;
++	if (bat_priv->dat.dht_hash)
+ 		return 0;
  
 -	bat_priv->dat.hash = batadv_hash_new(1024);
++	bat_priv->dat.dht_hash = batadv_hash_new(1024);
+ 
+-	if (!bat_priv->dat.hash)
++	if (!bat_priv->dat.dht_hash)
+ 		return -ENOMEM;
+ 
++	return 0;
++}
++
++/**
++ * batadv_dat_init() - initialise the DAT internals
++ * @bat_priv: the bat priv with all the soft interface information
++ *
++ * Return: 0 in case of success, a negative error code otherwise
++ */
++int batadv_dat_init(struct batadv_priv *bat_priv)
++{
++	int ret;
++
 +	ret = batadv_dat_cache_hash_init(bat_priv);
 +	if (ret < 0)
 +		return ret;
- 
--	if (!bat_priv->dat.hash)
--		return -ENOMEM;
++
 +	ret = batadv_dat_dht_hash_init(bat_priv);
 +	if (ret < 0)
 +		return ret;
- 
++
  	INIT_DELAYED_WORK(&bat_priv->dat.work, batadv_dat_purge);
  	batadv_dat_start_timer(bat_priv);
-@@ -837,30 +943,31 @@ void batadv_dat_free(struct batadv_priv *bat_priv)
+ 
+@@ -837,30 +943,31 @@ void batadv_dat_free(struct batadv_priv
  
  	cancel_delayed_work_sync(&bat_priv->dat.work);
  
@@ -368,7 +367,7 @@ index feff15817609..882728e047e0 100644
  	if (!hdr)
  		return -ENOBUFS;
  
-@@ -883,22 +990,23 @@ batadv_dat_cache_dump_entry(struct sk_buff *msg, u32 portid,
+@@ -883,22 +990,23 @@ batadv_dat_cache_dump_entry(struct sk_bu
  }
  
  /**
@@ -398,7 +397,7 @@ index feff15817609..882728e047e0 100644
  {
  	struct batadv_dat_entry *dat_entry;
  	int idx = 0;
-@@ -910,7 +1018,7 @@ batadv_dat_cache_dump_bucket(struct sk_buff *msg, u32 portid,
+@@ -910,7 +1018,7 @@ batadv_dat_cache_dump_bucket(struct sk_b
  		if (idx < *idx_skip)
  			goto skip;
  
@@ -407,7 +406,7 @@ index feff15817609..882728e047e0 100644
  			spin_unlock_bh(&hash->list_locks[bucket]);
  			*idx_skip = idx;
  
-@@ -926,30 +1034,26 @@ batadv_dat_cache_dump_bucket(struct sk_buff *msg, u32 portid,
+@@ -926,30 +1034,26 @@ skip:
  }
  
  /**
@@ -447,7 +446,7 @@ index feff15817609..882728e047e0 100644
  	primary_if = batadv_primary_if_get_selected(bat_priv);
  	if (!primary_if || primary_if->if_status != BATADV_IF_ACTIVE) {
  		ret = -ENOENT;
-@@ -957,8 +1061,8 @@ int batadv_dat_cache_dump(struct sk_buff *msg, struct netlink_callback *cb)
+@@ -957,8 +1061,8 @@ int batadv_dat_cache_dump(struct sk_buff
  	}
  
  	while (bucket < hash->size) {
@@ -458,7 +457,7 @@ index feff15817609..882728e047e0 100644
  			break;
  
  		bucket++;
-@@ -973,8 +1077,58 @@ int batadv_dat_cache_dump(struct sk_buff *msg, struct netlink_callback *cb)
+@@ -973,8 +1077,58 @@ int batadv_dat_cache_dump(struct sk_buff
  out:
  	batadv_hardif_put(primary_if);
  
@@ -490,7 +489,7 @@ index feff15817609..882728e047e0 100644
  	dev_put(soft_iface);
 +	return ret;
 +}
- 
++
 +/**
 + * batadv_dat_dht_dump() - dump the DAT DHT table to a netlink socket
 + * @msg: buffer for the message
@@ -509,7 +508,7 @@ index feff15817609..882728e047e0 100644
 +		return PTR_ERR(soft_iface);
 +
 +	bat_priv = netdev_priv(soft_iface);
-+
+ 
 +	ret = batadv_dat_dump(bat_priv, msg, cb, bat_priv->dat.dht_hash,
 +			      BATADV_CMD_GET_DAT_DHT);
 +
@@ -517,7 +516,7 @@ index feff15817609..882728e047e0 100644
  	return ret;
  }
  
-@@ -1154,9 +1308,9 @@ bool batadv_dat_snoop_outgoing_arp_request(struct batadv_priv *bat_priv,
+@@ -1154,9 +1308,9 @@ bool batadv_dat_snoop_outgoing_arp_reque
  	hw_src = batadv_arp_hw_src(skb, hdr_size);
  	ip_dst = batadv_arp_ip_dst(skb, hdr_size);
  
@@ -529,7 +528,7 @@ index feff15817609..882728e047e0 100644
  	if (dat_entry) {
  		/* If the ARP request is destined for a local client the local
  		 * client will answer itself. DAT would only generate a
-@@ -1246,9 +1400,9 @@ bool batadv_dat_snoop_incoming_arp_request(struct batadv_priv *bat_priv,
+@@ -1246,9 +1400,9 @@ bool batadv_dat_snoop_incoming_arp_reque
  
  	batadv_dbg_arp(bat_priv, skb, hdr_size, "Parsing incoming ARP REQUEST");
  
@@ -541,7 +540,7 @@ index feff15817609..882728e047e0 100644
  	if (!dat_entry)
  		goto out;
  
-@@ -1309,8 +1463,8 @@ void batadv_dat_snoop_outgoing_arp_reply(struct batadv_priv *bat_priv,
+@@ -1309,8 +1463,8 @@ void batadv_dat_snoop_outgoing_arp_reply
  	hw_dst = batadv_arp_hw_dst(skb, hdr_size);
  	ip_dst = batadv_arp_ip_dst(skb, hdr_size);
  
@@ -552,7 +551,7 @@ index feff15817609..882728e047e0 100644
  
  	/* Send the ARP reply to the candidates for both the IP addresses that
  	 * the node obtained from the ARP reply
-@@ -1332,7 +1486,8 @@ void batadv_dat_snoop_outgoing_arp_reply(struct batadv_priv *bat_priv,
+@@ -1332,7 +1486,8 @@ void batadv_dat_snoop_outgoing_arp_reply
   * packet has to be delivered to the interface
   */
  bool batadv_dat_snoop_incoming_arp_reply(struct batadv_priv *bat_priv,
@@ -562,7 +561,7 @@ index feff15817609..882728e047e0 100644
  {
  	struct batadv_dat_entry *dat_entry = NULL;
  	u16 type;
-@@ -1357,13 +1512,18 @@ bool batadv_dat_snoop_incoming_arp_reply(struct batadv_priv *bat_priv,
+@@ -1357,13 +1512,18 @@ bool batadv_dat_snoop_incoming_arp_reply
  	hw_dst = batadv_arp_hw_dst(skb, hdr_size);
  	ip_dst = batadv_arp_ip_dst(skb, hdr_size);
  
@@ -582,7 +581,7 @@ index feff15817609..882728e047e0 100644
  	if (dat_entry && batadv_compare_eth(hw_src, dat_entry->mac_addr)) {
  		batadv_dbg(BATADV_DBG_DAT, bat_priv, "Doubled ARP reply removed: ARP MSG = [src: %pM-%pI4 dst: %pM-%pI4]; dat_entry: %pM-%pI4\n",
  			   hw_src, &ip_src, hw_dst, &ip_dst,
-@@ -1374,8 +1534,8 @@ bool batadv_dat_snoop_incoming_arp_reply(struct batadv_priv *bat_priv,
+@@ -1374,8 +1534,8 @@ bool batadv_dat_snoop_incoming_arp_reply
  	/* Update our internal cache with both the IP addresses the node got
  	 * within the ARP reply
  	 */
@@ -593,7 +592,7 @@ index feff15817609..882728e047e0 100644
  
  	if (dropped)
  		goto out;
-@@ -1631,8 +1791,8 @@ static void batadv_dat_put_dhcp(struct batadv_priv *bat_priv, u8 *chaddr,
+@@ -1631,8 +1791,8 @@ static void batadv_dat_put_dhcp(struct b
  
  	skb_set_network_header(skb, ETH_HLEN);
  
@@ -604,7 +603,7 @@ index feff15817609..882728e047e0 100644
  
  	batadv_dat_forward_data(bat_priv, skb, yiaddr, vid,
  				BATADV_P_DAT_DHT_PUT);
-@@ -1757,8 +1917,8 @@ void batadv_dat_snoop_incoming_dhcp_ack(struct batadv_priv *bat_priv,
+@@ -1757,8 +1917,8 @@ void batadv_dat_snoop_incoming_dhcp_ack(
  	hw_src = ethhdr->h_source;
  	vid = batadv_dat_get_vid(skb, &hdr_size);
  
@@ -615,7 +614,7 @@ index feff15817609..882728e047e0 100644
  
  	batadv_dbg(BATADV_DBG_DAT, bat_priv,
  		   "Snooped from incoming DHCPACK (server address): %pI4, %pM (vid: %i)\n",
-@@ -1802,7 +1962,7 @@ bool batadv_dat_drop_broadcast_packet(struct batadv_priv *bat_priv,
+@@ -1802,7 +1962,7 @@ bool batadv_dat_drop_broadcast_packet(st
  		goto out;
  
  	ip_dst = batadv_arp_ip_dst(forw_packet->skb, hdr_size);
@@ -624,11 +623,9 @@ index feff15817609..882728e047e0 100644
  	/* check if the node already got this entry */
  	if (!dat_entry) {
  		batadv_dbg(BATADV_DBG_DAT, bat_priv,
-diff --git a/net/batman-adv/distributed-arp-table.h b/net/batman-adv/distributed-arp-table.h
-index bed7f3d20844..28ac93b0113d 100644
 --- a/net/batman-adv/distributed-arp-table.h
 +++ b/net/batman-adv/distributed-arp-table.h
-@@ -31,7 +31,8 @@ bool batadv_dat_snoop_incoming_arp_request(struct batadv_priv *bat_priv,
+@@ -31,7 +31,8 @@ bool batadv_dat_snoop_incoming_arp_reque
  void batadv_dat_snoop_outgoing_arp_reply(struct batadv_priv *bat_priv,
  					 struct sk_buff *skb);
  bool batadv_dat_snoop_incoming_arp_reply(struct batadv_priv *bat_priv,
@@ -638,7 +635,7 @@ index bed7f3d20844..28ac93b0113d 100644
  void batadv_dat_snoop_outgoing_dhcp_ack(struct batadv_priv *bat_priv,
  					struct sk_buff *skb,
  					__be16 proto,
-@@ -74,6 +75,7 @@ batadv_dat_init_own_addr(struct batadv_priv *bat_priv,
+@@ -74,6 +75,7 @@ batadv_dat_init_own_addr(struct batadv_p
  int batadv_dat_init(struct batadv_priv *bat_priv);
  void batadv_dat_free(struct batadv_priv *bat_priv);
  int batadv_dat_cache_dump(struct sk_buff *msg, struct netlink_callback *cb);
@@ -646,7 +643,7 @@ index bed7f3d20844..28ac93b0113d 100644
  
  /**
   * batadv_dat_inc_counter() - increment the correct DAT packet counter
-@@ -126,7 +128,8 @@ batadv_dat_snoop_outgoing_arp_reply(struct batadv_priv *bat_priv,
+@@ -126,7 +128,8 @@ batadv_dat_snoop_outgoing_arp_reply(stru
  
  static inline bool
  batadv_dat_snoop_incoming_arp_reply(struct batadv_priv *bat_priv,
@@ -656,40 +653,36 @@ index bed7f3d20844..28ac93b0113d 100644
  {
  	return false;
  }
-@@ -176,6 +179,12 @@ batadv_dat_cache_dump(struct sk_buff *msg, struct netlink_callback *cb)
+@@ -175,6 +178,12 @@ batadv_dat_cache_dump(struct sk_buff *ms
+ {
  	return -EOPNOTSUPP;
  }
- 
++
 +static inline int
 +batadv_dat_dht_dump(struct sk_buff *msg, struct netlink_callback *cb)
 +{
 +	return -EOPNOTSUPP;
 +}
-+
+ 
  static inline void batadv_dat_inc_counter(struct batadv_priv *bat_priv,
  					  u8 subtype)
- {
-diff --git a/net/batman-adv/netlink.c b/net/batman-adv/netlink.c
-index 95eb4ee7d181..67ac3e18617f 100644
 --- a/net/batman-adv/netlink.c
 +++ b/net/batman-adv/netlink.c
-@@ -1595,6 +1595,11 @@ static const struct genl_small_ops batadv_netlink_ops[] = {
- #endif // UGLY_HACK_STOP
+@@ -1596,6 +1596,11 @@ static const struct genl_small_ops batad
  		.dumpit = batadv_dat_cache_dump,
  	},
-+	{
+ 	{
 +		.cmd = BATADV_CMD_GET_DAT_DHT,
 +		.flags = GENL_ADMIN_PERM,
 +		.dumpit = batadv_dat_dht_dump,
 +	},
- 	{
++	{
  		.cmd = BATADV_CMD_GET_MCAST_FLAGS,
  #ifndef HAVE_BACKPORTS_LESS_5_10 // UGLY_HACK_START
-diff --git a/net/batman-adv/routing.c b/net/batman-adv/routing.c
-index 78a7f88bc43e..a96457115b4c 100644
+ 		.validate = GENL_DONT_VALIDATE_STRICT | GENL_DONT_VALIDATE_DUMP,
 --- a/net/batman-adv/routing.c
 +++ b/net/batman-adv/routing.c
-@@ -950,10 +950,10 @@ int batadv_recv_unicast_packet(struct sk_buff *skb,
+@@ -950,10 +950,10 @@ int batadv_recv_unicast_packet(struct sk
  	struct batadv_unicast_4addr_packet *unicast_4addr_packet;
  	u8 *orig_addr, *orig_addr_gw;
  	struct batadv_orig_node *orig_node = NULL, *orig_node_gw = NULL;
@@ -701,7 +694,7 @@ index 78a7f88bc43e..a96457115b4c 100644
  
  	unicast_packet = (struct batadv_unicast_packet *)skb->data;
  	is4addr = unicast_packet->packet_type == BATADV_UNICAST_4ADDR;
-@@ -1012,6 +1012,8 @@ int batadv_recv_unicast_packet(struct sk_buff *skb,
+@@ -1012,6 +1012,8 @@ int batadv_recv_unicast_packet(struct sk
  				orig_addr = unicast_4addr_packet->src;
  				orig_node = batadv_orig_hash_find(bat_priv,
  								  orig_addr);
@@ -710,7 +703,7 @@ index 78a7f88bc43e..a96457115b4c 100644
  			}
  		}
  
-@@ -1019,7 +1021,7 @@ int batadv_recv_unicast_packet(struct sk_buff *skb,
+@@ -1019,7 +1021,7 @@ int batadv_recv_unicast_packet(struct sk
  							  hdr_size))
  			goto rx_success;
  		if (batadv_dat_snoop_incoming_arp_reply(bat_priv, skb,
@@ -719,7 +712,7 @@ index 78a7f88bc43e..a96457115b4c 100644
  			goto rx_success;
  
  		batadv_dat_snoop_incoming_dhcp_ack(bat_priv, skb, hdr_size);
-@@ -1256,7 +1258,7 @@ int batadv_recv_bcast_packet(struct sk_buff *skb,
+@@ -1256,7 +1258,7 @@ int batadv_recv_bcast_packet(struct sk_b
  
  	if (batadv_dat_snoop_incoming_arp_request(bat_priv, skb, hdr_size))
  		goto rx_success;
@@ -728,8 +721,6 @@ index 78a7f88bc43e..a96457115b4c 100644
  		goto rx_success;
  
  	batadv_dat_snoop_incoming_dhcp_ack(bat_priv, skb, hdr_size);
-diff --git a/net/batman-adv/types.h b/net/batman-adv/types.h
-index 89a6a85b17b8..397409715271 100644
 --- a/net/batman-adv/types.h
 +++ b/net/batman-adv/types.h
 @@ -1231,8 +1231,11 @@ struct batadv_priv_dat {
@@ -746,6 +737,3 @@ index 89a6a85b17b8..397409715271 100644
  
  	/** @work: work queue callback item for cache purging */
  	struct delayed_work work;
--- 
-2.47.2
-
